@@ -8,7 +8,7 @@ import Rab from "./components/Rab";
 import UploadHspk from "./components/UploadHspk";
 import Bv from "./components/Bv";
 import TimeSchedulePage from "./components/TimeSchedulePage";
-// import JoinOpnamePage from "./components/JoinOpname";
+import JoinOpnamePage from "./components/JoinOpname";
 
 function App() {
   // ============================================================
@@ -198,12 +198,12 @@ function App() {
           />
         )}
 
-        {/* {activeTab === "join-opname" && (
+        {activeTab === "join-opname" && (
         <JoinOpnamePage
           initialProjectId={selectedProjectId}
           apiBaseUrl="http://localhost:4000/api"
         />
-      )} */}
+      )}
 
         {/* ======================================================
             FALLBACK
