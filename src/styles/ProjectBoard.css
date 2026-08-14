@@ -1,0 +1,251 @@
+/* ===========================================
+  ProjectBoard.css — retheme dark & gold
+  Palette & type shared with ViewDetail.css / Dashboard.css
+=========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+.board-wrapper {
+  --bg: #0c0b09;
+  --surface: #17140f;
+  --surface-hover: #1d1810;
+  --border: #322b1e;
+  --border-soft: #221e15;
+  --gold: #c9a24b;
+  --gold-bright: #e8c874;
+  --gold-dim: #7d6733;
+  --text: #f2ead9;
+  --text-muted: #a89c85;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Manrope', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201, 162, 75, 0.08), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* Navbar */
+.board-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background-color: transparent;
+  border-bottom: 1px solid var(--border-soft);
+}
+.board-navbar h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.board-actions { display: flex; align-items: center; gap: 20px; }
+.search-box {
+  display: flex; align-items: center; background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 8px 16px; gap: 8px;
+  transition: border-color 0.2s ease;
+}
+.search-box:focus-within { border-color: var(--gold); }
+.search-box input {
+  background: transparent; border: none; color: var(--text); outline: none;
+  font-family: var(--font-body);
+}
+.icon-btn {
+  background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+  transition: color 0.2s ease;
+}
+.icon-btn:hover { color: var(--gold-bright); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold-dim); }
+.text-gray { color: var(--text-muted); }
+.cursor-pointer { cursor: pointer; }
+
+/* Toolbar */
+.board-toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 32px;
+}
+.filter-group { display: flex; gap: 12px; }
+.toolbar-btn {
+  display: flex; align-items: center; gap: 8px;
+  background-color: var(--surface); border: 1px solid var(--border);
+  color: var(--text); padding: 8px 16px; border-radius: 4px; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.85rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.toolbar-btn:hover { border-color: var(--gold-dim); color: var(--gold-bright); }
+
+.create-new-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: #17140f; font-weight: 700;
+  border: none; padding: 8px 24px; border-radius: 4px; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.85rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.create-new-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -10px rgba(201, 162, 75, 0.5);
+}
+
+/* Kanban Board */
+.kanban-container {
+  display: flex;
+  padding: 0 32px 32px;
+  gap: 24px;
+  overflow-x: auto;
+  align-items: flex-start;
+}
+.kanban-column {
+  min-width: 280px;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.column-header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.column-header h3 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin: 0; display: flex; align-items: center; gap: 8px;
+}
+.count {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* Kanban Cards — corner-bracket signature shared with ViewDetail/Dashboard */
+.kanban-card {
+  position: relative;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition:  0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.kanban-card::before,
+.kanban-card::after {
+  content: '';
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  z-index: 2;
+  transition: border-color 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+.kanban-card::before {
+  top: -1px; left: -1px;
+  border-top: 1.5px solid var(--gold-dim);
+  border-left: 1.5px solid var(--gold-dim);
+}
+.kanban-card::after {
+  bottom: -1px; right: -1px;
+  border-bottom: 1.5px solid var(--gold-dim);
+  border-right: 1.5px solid var(--gold-dim);
+}
+.kanban-card:hover {
+  background-color: var(--surface-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
+}
+.kanban-card:hover::before,
+.kanban-card:hover::after {
+  border-color: var(--gold-bright);
+  width: 13px;
+  height: 13px;
+}
+
+.highlighted-card {
+  border-color: rgba(201, 162, 75, 0.45);
+}
+
+.card-image {
+  height: 120px;
+  background-color: var(--border-soft); /* Fallback color */
+  background-size: cover; background-position: center;
+  filter: saturate(0.85) brightness(0.9);
+}
+
+/* Simulasi gambar untuk demo */
+.bg-img-1 { background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=500'); }
+.bg-img-2 { background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=500'); }
+.bg-img-3 { background-image: url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=500'); }
+.bg-img-4 { background-image: url('https://images.unsplash.com/photo-1541888081-3051405e320d?w=500'); }
+.bg-img-5 { background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=500'); }
+.bg-img-6 { background-image: url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500'); }
+
+.card-body { padding: 16px; }
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; font-weight: 600;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.badge-residential { color: var(--gold-bright); border-color: var(--gold-dim); }
+.badge-commercial { color: var(--gold-bright); border-color: var(--gold-dim); }
+
+.card-body h4 {
+  margin: 12px 0 4px 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.client-text { font-size: 0.75rem; color: var(--text-muted); margin: 0 0 16px 0; }
+
+.progress-info {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem; font-weight: 600;
+  color: var(--text-muted); margin-bottom: 6px;
+}
+.progress-track {
+  height: 4px; background-color: var(--border-soft); border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright));
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; border-top: 1px solid var(--border-soft);
+}
+.date { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); }
+.assignee-avatar { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--gold-dim); }
+
+.add-task-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background-color: transparent; border: 1px dashed var(--border); color: var(--text-muted);
+  padding: 12px; border-radius: 4px; cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.add-task-btn:hover { border-color: var(--gold); color: var(--gold-bright); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kanban-card, .create-new-btn, .icon-btn, .toolbar-btn, .add-task-btn {
+    transition: none !important;
+  }
+}

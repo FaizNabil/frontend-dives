@@ -1,0 +1,519 @@
+/* ============================================================
+   RAB & Budgeting — tema emas & hitam, senada sama Sidebar
+   (DIVES CORP.). Font serif buat heading, mono buat angka.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --rab-bg: #0c0c0c;
+  --rab-panel: #161513;
+  --rab-panel-alt: #1c1a17;
+  --rab-line: rgba(212, 175, 106, 0.14);
+  --rab-line-strong: rgba(212, 175, 106, 0.32);
+  --rab-gold: #d4af6a;
+  --rab-gold-deep: #b8903f;
+  --rab-gold-soft: rgba(212, 175, 106, 0.1);
+  --rab-text: #ece3d2;
+  --rab-text-muted: #8f8672;
+  --rab-danger: #c96b62;
+  --rab-danger-soft: rgba(201, 107, 98, 0.12);
+  --rab-serif: 'Cormorant Garamond', Georgia, serif;
+  --rab-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --rab-sans: 'Segoe UI', system-ui, sans-serif;
+}
+
+.rab-wrapper {
+  min-height: 100vh;
+  background: var(--rab-bg);
+  color: var(--rab-text);
+  font-family: var(--rab-sans);
+  padding: 36px 40px 60px;
+}
+
+/* ================= HEADER ================= */
+.rab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding-bottom: 22px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--rab-line-strong);
+}
+
+.rab-eyebrow {
+  font-family: var(--rab-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rab-gold);
+  margin: 0 0 6px 0;
+}
+
+.rab-title {
+  font-family: var(--rab-serif);
+  font-weight: 600;
+  font-size: 34px;
+  letter-spacing: 0.01em;
+  color: var(--rab-text);
+  margin: 0 0 6px 0;
+}
+
+.rab-subtitle {
+  font-size: 13px;
+  color: var(--rab-text-muted);
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.5;
+}
+
+.rab-pair-link {
+  background: none;
+  border: none;
+  color: var(--rab-gold);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  padding: 10px 0 0 0;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.rab-pair-link:hover {
+  border-bottom-color: var(--rab-gold);
+}
+
+/* ---- Project picker ---- */
+.rab-project-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.rab-project-select {
+  appearance: none;
+  background: var(--rab-panel);
+  border: 1px solid var(--rab-line-strong);
+  color: var(--rab-text);
+  border-radius: 3px;
+  padding: 11px 34px 11px 16px;
+  font-size: 13px;
+  font-family: var(--rab-sans);
+  cursor: pointer;
+  min-width: 240px;
+  transition: border-color 0.15s ease;
+}
+
+.rab-project-select:hover,
+.rab-project-select:focus {
+  border-color: var(--rab-gold);
+  outline: none;
+}
+
+.rab-project-select-icon {
+  position: absolute;
+  right: 14px;
+  pointer-events: none;
+  color: var(--rab-gold-deep);
+}
+
+/* ================= CONTENT ================= */
+.rab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rab-plate {
+  background: var(--rab-panel);
+  border: 1px solid var(--rab-line);
+  border-radius: 4px;
+}
+
+.rab-text-center { text-align: center; }
+.rab-text-muted { color: var(--rab-text-muted); }
+.rab-text-danger { color: var(--rab-danger); }
+.rab-text-sm { font-size: 12px; }
+.rab-fw-bold { font-weight: 600; }
+.rab-mono { font-family: var(--rab-mono); font-variant-numeric: tabular-nums; }
+
+/* ================= TOOLBAR (export) ================= */
+.rab-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.rab-btn {
+  background: transparent;
+  border: 1px solid var(--rab-line-strong);
+  color: var(--rab-text);
+  border-radius: 3px;
+  padding: 9px 16px;
+  font-size: 12.5px;
+  font-family: var(--rab-sans);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.rab-btn:hover {
+  border-color: var(--rab-gold);
+  color: var(--rab-gold);
+  background: var(--rab-gold-soft);
+}
+
+.rab-btn-primary {
+  background: var(--rab-gold);
+  color: #0c0c0c;
+  border-color: var(--rab-gold);
+  font-weight: 600;
+}
+
+.rab-btn-primary:hover {
+  background: var(--rab-gold-deep);
+  border-color: var(--rab-gold-deep);
+  color: #0c0c0c;
+}
+
+.rab-btn-small {
+  padding: 5px 11px;
+  font-size: 11.5px;
+}
+
+.rab-btn-active {
+  background: var(--rab-gold);
+  color: #0c0c0c;
+  border-color: var(--rab-gold);
+}
+
+.rab-btn-danger {
+  border-color: rgba(201, 107, 98, 0.4);
+  color: var(--rab-danger);
+}
+
+.rab-btn-danger:hover {
+  background: var(--rab-danger-soft);
+  border-color: var(--rab-danger);
+  color: var(--rab-danger);
+}
+
+/* ================= STATS ================= */
+.rab-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.rab-stat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 18px 0 18px;
+}
+
+.rab-stat-icon {
+  color: var(--rab-gold-deep);
+}
+
+.rab-stat-label {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rab-text-muted);
+}
+
+.rab-stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  padding: 10px 18px 2px 18px;
+  color: var(--rab-text);
+}
+
+.rab-stat-value.is-mono {
+  font-family: var(--rab-mono);
+}
+
+.rab-stat-desc {
+  font-size: 11.5px;
+  color: var(--rab-text-muted);
+  padding: 0 18px 18px 18px;
+}
+
+.rab-plate.is-danger {
+  border-color: rgba(201, 107, 98, 0.4);
+}
+
+.rab-plate.is-danger .rab-stat-value {
+  color: var(--rab-danger);
+}
+
+/* ================= SEARCH ================= */
+.rab-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rab-search-icon {
+  color: var(--rab-text-muted);
+  flex-shrink: 0;
+}
+
+.rab-search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--rab-text);
+  font-size: 13px;
+  font-family: var(--rab-sans);
+  outline: none;
+}
+
+.rab-search-box input::placeholder {
+  color: var(--rab-text-muted);
+}
+
+/* ================= TREE ================= */
+.rab-tree-plate {
+  padding: 18px;
+}
+
+.rab-group-block {
+  margin-bottom: 14px;
+}
+
+.rab-group-row,
+.rab-subgroup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 16px;
+  border-radius: 3px;
+}
+
+.rab-group-row {
+  background: var(--rab-gold-soft);
+  border: 1px solid var(--rab-line-strong);
+  margin-bottom: 8px;
+}
+
+.rab-subgroup-row {
+  border-bottom: 1px solid var(--rab-line);
+  padding-left: 4px;
+}
+
+.rab-ref {
+  font-family: var(--rab-mono);
+  color: var(--rab-gold-deep);
+  margin-right: 10px;
+  font-size: 11.5px;
+}
+
+.rab-group-label {
+  font-family: var(--rab-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--rab-text);
+  letter-spacing: 0.01em;
+}
+
+.rab-subgroup-row .rab-group-label {
+  font-size: 14.5px;
+  font-family: var(--rab-sans);
+  font-weight: 500;
+}
+
+.rab-group-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rab-group-subtotal {
+  font-family: var(--rab-mono);
+  color: var(--rab-gold);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---- Items table ---- */
+.rab-items-table {
+  width: calc(100% - 20px);
+  margin: 4px 0 14px 20px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.rab-items-table th {
+  background: transparent;
+  color: var(--rab-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--rab-line-strong);
+}
+
+.rab-items-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--rab-line);
+  color: var(--rab-text);
+}
+
+.rab-items-table tbody tr:hover {
+  background: rgba(212, 175, 106, 0.04);
+}
+
+.rab-special-cell {
+  background: rgba(212, 175, 106, 0.08);
+  color: var(--rab-gold);
+  font-weight: 600;
+  font-family: var(--rab-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.rab-row-actions {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.rab-owner-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--rab-gold);
+  background: var(--rab-gold-soft);
+  border: 1px solid var(--rab-line-strong);
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+/* ================= EDIT MODAL ================= */
+.rab-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.rab-modal {
+  background: var(--rab-panel-alt);
+  border: 1px solid var(--rab-line-strong);
+  border-radius: 5px;
+  padding: 28px;
+  width: 500px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.rab-modal h3 {
+  margin: 0 0 6px 0;
+  font-family: var(--rab-serif);
+  color: var(--rab-gold);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.rab-edit-label {
+  color: var(--rab-text-muted);
+  font-size: 12.5px;
+  margin: 0 0 18px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rab-line);
+}
+
+.rab-toggle-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.rab-form-label {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.03em;
+  color: var(--rab-text-muted);
+  margin-bottom: 14px;
+}
+
+.rab-form-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: var(--rab-sans);
+  background: var(--rab-bg);
+  border: 1px solid var(--rab-line-strong);
+  color: var(--rab-text);
+  border-radius: 3px;
+  transition: border-color 0.15s ease;
+}
+
+.rab-form-input:focus {
+  outline: none;
+  border-color: var(--rab-gold);
+}
+
+.rab-form-input:disabled {
+  opacity: 0.4;
+}
+
+.rab-switch-job {
+  margin-bottom: 16px;
+}
+
+.rab-switch-job-box {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px dashed var(--rab-line-strong);
+  border-radius: 3px;
+  background: rgba(212, 175, 106, 0.03);
+}
+
+.rab-comp-row {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 0.8fr 0.7fr 0.9fr auto;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.rab-comp-row .rab-form-input {
+  margin-top: 0;
+}
+
+.rab-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid var(--rab-line);
+  padding-top: 16px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 960px) {
+  .rab-wrapper { padding: 24px; }
+  .rab-header { flex-direction: column; }
+  .rab-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .rab-comp-row { grid-template-columns: 1fr 1fr; }
+}

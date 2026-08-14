@@ -1,0 +1,518 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ============================================================
+   Token warna sama persis kayak Rab.css / Bv.css - biar semua
+   halaman (Buat BV, RAB, Dashboard) senada satu identitas.
+   ============================================================ */
+.bv-panel {
+  --bv-bg: #0c0c0c;
+  --bv-panel: #161513;
+  --bv-panel-alt: #1c1a17;
+  --bv-line: rgba(212, 175, 106, 0.14);
+  --bv-line-strong: rgba(212, 175, 106, 0.32);
+  --bv-gold: #d4af6a;
+  --bv-gold-deep: #b8903f;
+  --bv-gold-soft: rgba(212, 175, 106, 0.1);
+  --bv-text: #ece3d2;
+  --bv-text-muted: #8f8672;
+  --bv-danger: #c96b62;
+  --bv-danger-soft: rgba(201, 107, 98, 0.12);
+  --bv-ok: #7fae6e;
+  --bv-ok-soft: rgba(127, 174, 110, 0.12);
+  --bv-serif: 'Cormorant Garamond', Georgia, serif;
+  --bv-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --bv-sans: 'Segoe UI', system-ui, sans-serif;
+
+  background: var(--bv-panel);
+  border: 1px solid var(--bv-line);
+  border-radius: 5px;
+  width: 100%;
+  max-width: 1400px;
+  padding: 28px 32px;
+  font-family: var(--bv-sans);
+  color: var(--bv-text);
+}
+
+/* ================= HEADER ================= */
+.bv-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 18px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--bv-line-strong);
+}
+
+.bv-title {
+  font-family: var(--bv-serif);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.01em;
+  color: var(--bv-text);
+  margin: 0;
+}
+
+.bv-subtitle {
+  font-family: var(--bv-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: var(--bv-text-muted);
+  margin: 6px 0 0 0;
+}
+
+.bv-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--bv-text-muted);
+  transition: color 0.15s ease;
+}
+
+.bv-close-btn:hover {
+  color: var(--bv-gold);
+}
+
+/* ================= TOOLBAR ================= */
+.bv-toolbar {
+  display: flex;
+  gap: 12px; /* Dilebarkan sedikit karena sekarang ada 4 tombol */
+  flex-wrap: wrap;
+  margin: 20px 0 24px 0;
+  align-items: center; /* Memastikan semua tombol sejajar secara vertikal */
+}
+
+.bv-btn {
+  background: transparent;
+  border: 1px solid var(--bv-line-strong);
+  color: var(--bv-text);
+  border-radius: 4px; /* Sedikit diperhalus */
+  padding: 9px 16px;
+  font-size: 12.5px;
+  font-family: var(--bv-sans);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bv-btn:hover {
+  border-color: var(--bv-gold);
+  color: var(--bv-gold);
+  background: var(--bv-gold-soft);
+  box-shadow: 0 0 10px rgba(212, 175, 106, 0.1);
+}
+
+.bv-btn:active {
+  transform: scale(0.96); /* Efek interaktif ditekan */
+}
+
+.bv-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.bv-btn-primary {
+  background: var(--bv-gold);
+  color: #0c0c0c;
+  border-color: var(--bv-gold);
+  font-weight: 600;
+}
+
+.bv-btn-primary:hover {
+  background: var(--bv-gold-deep);
+  border-color: var(--bv-gold-deep);
+  color: #0c0c0c;
+  box-shadow: 0 4px 12px rgba(212, 175, 106, 0.25);
+}
+
+/* --- Style Khusus untuk Tombol Custom --- */
+.bv-btn-custom {
+  border-style: dashed;
+  color: var(--bv-text-muted);
+}
+
+.bv-btn-custom:hover {
+  border-style: solid;
+  color: var(--bv-text);
+}
+
+.bv-btn-xs {
+  padding: 5px 12px;
+  font-size: 11.5px;
+}
+
+.bv-btn-danger {
+  border-color: rgba(201, 107, 98, 0.4);
+  color: var(--bv-danger);
+}
+
+.bv-btn-danger:hover {
+  background: var(--bv-danger-soft);
+  border-color: var(--bv-danger);
+  color: var(--bv-danger);
+}
+
+.bv-btn-export {
+  border-color: var(--bv-ok);
+  color: var(--bv-ok);
+  margin-left: auto;
+}
+
+.bv-btn-export:hover {
+  background: var(--bv-ok-soft);
+  border-color: var(--bv-ok);
+  color: var(--bv-ok);
+}
+
+.bv-empty {
+  color: var(--bv-text-muted);
+  font-size: 13px;
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* ================= GROUP ================= */
+.bv-group {
+  border-top: 1px solid var(--bv-line-strong);
+  margin-bottom: 22px;
+  padding-top: 14px;
+}
+
+.bv-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bv-gold-soft);
+  border: 1px solid var(--bv-line-strong);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bv-group-title {
+  font-family: var(--bv-serif);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--bv-text);
+  letter-spacing: 0.01em;
+}
+
+.bv-group-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ================= TABLE ================= */
+.bv-table-scroll {
+  overflow-x: auto;
+  margin-bottom: 8px;
+  border-radius: 3px;
+}
+
+.bv-table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.bv-table th {
+  background: transparent;
+  color: var(--bv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--bv-line-strong);
+  padding: 8px 9px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.bv-table td {
+  border-bottom: 1px solid var(--bv-line);
+  padding: 8px 9px;
+  color: var(--bv-text);
+}
+
+.bv-table tbody tr:hover {
+  background: rgba(212, 175, 106, 0.04);
+}
+
+.bv-detail-row td {
+  color: var(--bv-text-muted);
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 11.5px;
+}
+
+.bv-detail-label {
+  padding-left: 16px;
+  font-style: italic;
+}
+
+.bv-status {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.bv-status-ok {
+  background: var(--bv-ok-soft);
+  color: var(--bv-ok);
+}
+
+.bv-status-warn {
+  background: var(--bv-danger-soft);
+  color: var(--bv-danger);
+}
+
+.bv-row-actions {
+  display: flex;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.bv-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--bv-line);
+  padding-top: 18px;
+  margin-top: 12px;
+}
+
+/* ================= INNER MODAL (tambah group / baris) ================= */
+.bv-inner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.bv-inner-modal {
+  background: var(--bv-panel-alt, #1c1a17);
+  border: 1px solid var(--bv-line-strong, rgba(212, 175, 106, 0.32));
+  border-radius: 5px;
+  padding: 24px 26px;
+  width: 380px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #ece3d2;
+}
+
+.bv-inner-modal-wide {
+  width: 1040px;
+}
+
+.bv-inner-modal h3 {
+  margin: 0 0 18px 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: #d4af6a;
+}
+
+.bv-form-label {
+  display: block;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: #8f8672;
+  margin-bottom: 14px;
+}
+
+.bv-form-hint {
+  font-size: 11px;
+  color: #8f8672;
+  margin: -8px 0 14px 0;
+  line-height: 1.5;
+}
+
+.bv-form-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 5px;
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #0c0c0c;
+  border: 1px solid rgba(212, 175, 106, 0.32);
+  color: #ece3d2;
+  border-radius: 3px;
+  transition: border-color 0.15s ease;
+}
+
+.bv-form-input:focus {
+  outline: none;
+  border-color: #d4af6a;
+}
+
+.bv-form-input:disabled {
+  opacity: 0.4;
+}
+
+.bv-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.bv-form-row-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.bv-inner-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(212, 175, 106, 0.14);
+  padding-top: 16px;
+}
+
+/* ---- Breakdown dinamis ---- */
+.bv-breakdown-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr repeat(10, 0.8fr) auto;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.bv-breakdown-row .bv-form-input {
+  margin-top: 0;
+}
+
+.bv-breakdown-subtotal {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 11.5px;
+  color: #d4af6a;
+  font-weight: 600;
+  text-align: right;
+}
+
+.bv-hspk-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #d4af6a;
+  background: rgba(212, 175, 106, 0.1);
+  border: 1px solid rgba(212, 175, 106, 0.32);
+  border-radius: 3px;
+}
+
+/* ---- Autocomplete HSPK ---- */
+.bv-autocomplete {
+  position: relative;
+}
+
+.bv-autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #1c1a17;
+  border: 1px solid rgba(212, 175, 106, 0.32);
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+.bv-autocomplete-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 11px;
+  font-size: 12.5px;
+  color: #ece3d2;
+  cursor: pointer;
+}
+
+.bv-autocomplete-item:hover {
+  background: rgba(212, 175, 106, 0.1);
+}
+
+.bv-autocomplete-empty {
+  color: #8f8672;
+  cursor: default;
+  font-style: italic;
+}
+
+.bv-autocomplete-empty:hover {
+  background: none;
+}
+
+.bv-autocomplete-unit {
+  color: #8f8672;
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  .bv-panel {
+    padding: 20px 16px;
+  }
+
+  .bv-panel-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bv-title {
+    font-size: 21px;
+  }
+
+  .bv-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bv-btn-export {
+    margin-left: 0;
+  }
+
+  .bv-inner-modal-wide {
+    width: 100%;
+  }
+
+  .bv-form-row,
+  .bv-form-row-5 {
+    grid-template-columns: 1fr;
+  }
+
+  .bv-breakdown-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .bv-breakdown-subtotal {
+    text-align: left;
+    grid-column: 1 / -1;
+  }
+}

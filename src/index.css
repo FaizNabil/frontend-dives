@@ -1,0 +1,15 @@
+/* Reset CSS untuk menghilangkan jarak putih di pinggir browser */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #111111; /* Warna gelap agar menyatu dengan dashboard */
+  overflow-x: hidden; /* Mencegah scroll menyamping jika ada elemen yang kelebihan lebar */
+}

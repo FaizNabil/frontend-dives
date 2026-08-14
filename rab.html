@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>RAB — Rencana Anggaran Biaya</title>
+    <style>
+      :root {
+        --ink: #1a2332;
+        --line: #c8cdd6;
+        --paper: #fbfaf7;
+        --accent: #2b5c8a;
+        --accent-soft: #eaf1f7;
+        --mono: "Courier New", monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        margin: 0;
+        padding: 24px;
+        font-size: 14px;
+      }
+      h1 {
+        font-size: 18px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--ink);
+        padding-bottom: 10px;
+        margin: 0 0 20px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      button {
+        font-family: inherit;
+        font-size: 13px;
+        border: 1px solid var(--ink);
+        background: var(--paper);
+        color: var(--ink);
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--accent-soft);
+      }
+      button.primary {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      button.primary:hover {
+        background: var(--accent);
+      }
+      button.danger {
+        border-color: #a33;
+        color: #a33;
+      }
+      button.danger:hover {
+        background: #fbe9e9;
+      }
+      button.small {
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+
+      .tree {
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+      .group-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--accent-soft);
+      }
+      .group-row .label {
+        font-weight: 600;
+      }
+      .group-row .ref {
+        font-family: var(--mono);
+        color: #667;
+        margin-right: 8px;
+      }
+      .children {
+        padding-left: 22px;
+        border-left: 2px solid var(--line);
+        margin-left: 14px;
+      }
+      .subgroup-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .subgroup-row .label {
+        font-weight: 500;
+      }
+
+      table.items {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 4px 0 10px 22px;
+        width: calc(100% - 22px);
+      }
+      table.items th,
+      table.items td {
+        border: 1px solid var(--line);
+        padding: 6px 10px;
+        text-align: left;
+        font-size: 12.5px;
+      }
+      .filter-tab.active {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      table.items th {
+        background: #f0efe9;
+        font-weight: 600;
+      }
+      table.items td.num {
+        text-align: right;
+        font-family: var(--mono);
+      }
+      .empty-note {
+        padding: 14px;
+        color: #888;
+        font-style: italic;
+      }
+
+      dialog {
+        border: 1px solid var(--ink);
+        padding: 20px;
+        min-width: 360px;
+        font-family: inherit;
+      }
+      dialog h3 {
+        margin-top: 0;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+      dialog label {
+        display: block;
+        font-size: 12px;
+        margin: 10px 0 3px;
+        color: #555;
+      }
+      dialog input,
+      dialog select,
+      dialog textarea {
+        width: 100%;
+        padding: 6px 8px;
+        font-family: inherit;
+        font-size: 13px;
+        border: 1px solid var(--line);
+      }
+      dialog .actions {
+        margin-top: 16px;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .comp-row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .comp-row input,
+      .comp-row select {
+        flex: 1;
+      }
+      .total-bar {
+        margin-top: 16px;
+        padding: 12px 14px;
+        background: var(--ink);
+        color: var(--paper);
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 14px;
+      }
+      #status {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>RAB — Rencana Anggaran Biaya</h1>
+    <div id="status">Memuat project…</div>
+
+    <div class="toolbar">
+      <button class="primary" onclick="openGroupDialog(null)">
+        + Tambah Group Pekerjaan
+      </button>
+      <button
+        onclick="
+          alert(
+            'Pilih Sub-Group lewat tombol \'+ Sub-Group\' di dalam Group yang sudah ada.',
+          )
+        "
+      >
+        + Tambah Sub-Group Pekerjaan
+      </button>
+      <div id="pairLink">
+        <a href="bv.html?projectId=${project.pairedProjectId}">
+          Buka versi ${project.pairedProject.discipline === 'Interior' ? 'SIPIL'
+          : 'Civil'} →
+        </a>
+      </div>
+      <button onclick="exportRabExcel()">⬇ Export RAB</button>
+      <button onclick="exportBvExcel()">⬇ Export BV</button>
+      <button onclick="scheduleExport()">⬇ export Schedule</button>
+      <button onclick="exportFullExcel()">⬇ Export Lengkap</button>
+      <button onclick="viewRab()">👁 View RAB</button>
+    </div>
+
+    <div class="tree" id="tree"></div>
+
+    <div class="total-bar">
+      <span>TOTAL RAB</span>
+      <span id="grandTotal">Rp 0</span>
+    </div>
+
+    <!-- Dialog: Group / Sub-Group -->
+    <dialog id="groupDialog">
+      <h3 id="groupDialogTitle">Tambah Group Pekerjaan</h3>
+      <label>Nama</label>
+      <input id="groupName" placeholder="mis. PEKERJAAN PERSIAPAN" />
+      <label>Referensi (opsional)</label>
+      <input id="groupRef" placeholder="mis. 1 atau 1.1" />
+      <div class="actions">
+        <button onclick="document.getElementById('groupDialog').close()">
+          Batal
+        </button>
+        <button class="primary" onclick="submitGroup()">Simpan</button>
+      </div>
+    </dialog>
+
+    <!-- Dialog: Baris Pekerjaan -->
+    <dialog id="itemDialog">
+      <h3>Tambah Baris Pekerjaan</h3>
+      <label>Mode</label>
+      <select id="itemMode" onchange="toggleItemMode()">
+        <option value="master" id="masterOptionLabel">
+          Dari Master HSPK/AHSP
+        </option>
+        <option value="custom">Custom (input manual)</option>
+      </select>
+
+      <div id="masterFields">
+        <label>Cari Jenis Pekerjaan</label>
+        <input
+          id="jobSearch"
+          placeholder="ketik nama pekerjaan…"
+          oninput="searchJobs()"
+        />
+        <select id="jobResult" size="5"></select>
+      </div>
+
+      <div id="customFields" style="display: none">
+        <label>Nama Pekerjaan</label>
+        <input id="customName" />
+        <label>Satuan Pembayaran</label>
+        <input id="customUnit" placeholder="m2 / m3 / buah / dst" />
+        <label>Komponen (Upah/Bahan/Alat)</label>
+        <div id="compList"></div>
+        <button class="small" onclick="addCompRow()">+ Komponen</button>
+      </div>
+
+      <label>Volume</label>
+      <input id="itemVolume" type="number" step="0.01" placeholder="mis. 25" />
+
+      <div class="actions">
+        <button onclick="document.getElementById('itemDialog').close()">
+          Batal
+        </button>
+        <button class="primary" onclick="submitItem()">Simpan</button>
+      </div>
+    </dialog>
+
+    <dialog id="editDialog">
+      <h3>Edit Baris Pekerjaan</h3>
+      <p id="editItemLabel" style="color: #666; margin: 4px 0 12px"></p>
+
+      <label>Jadikan By Owner</label>
+      <button type="button" class="small" onclick="toggleByOwner()">
+        Set By Owner
+      </button>
+      <button type="button" onclick="toggleStip()">Set Harga Stip (-)</button>
+      <!-- Hidden input untuk menyimpan status stip -->
+
+      <!-- Tombol untuk memicu fungsi toggleStip -->
+      <input type="hidden" id="editIsByOwner" value="false" />
+      <input type="hidden" id="editIsStip" value="false" />
+
+      <label>Harga RAP (Satuan, manual)</label>
+      <input id="editRapPrice" type="number" placeholder="0" />
+
+      <label>Harga RAB (Satuan, manual)</label>
+      <input id="editRabPrice" type="number" />
+
+      <!-- >>> TARUH DI SINI <<< -->
+
+      <!-- >>> SAMPAI SINI <<< -->
+
+      <div
+        id="switchJobBox"
+        style="
+          display: none;
+          margin-top: 6px;
+          padding: 10px;
+          border: 1px dashed var(--line);
+        "
+      >
+        ...
+        <label>Cari Jenis Pekerjaan Baru</label>
+        <input
+          id="switchJobSearch"
+          placeholder="ketik nama pekerjaan…"
+          oninput="searchSwitchJobs()"
+        />
+        <select id="switchJobResult" size="4" style="margin-top: 4px"></select>
+        <button
+          class="small primary"
+          style="margin-top: 6px"
+          onclick="confirmSwitchJob()"
+        >
+          Ganti ke Pekerjaan Ini
+        </button>
+      </div>
+      <button
+        id="switchJobBtn"
+        class="small"
+        style="display: none; margin-top: 6px"
+        onclick="toggleSwitchJobBox()"
+      >
+        🔄 Ganti Jenis Pekerjaan
+      </button>
+
+      <label style="margin-top: 14px"
+        >Komponen — dipakai untuk hitung RAP otomatis (kosongkan semua baris =
+        pakai harga manual di atas)</label
+      >
+      <div id="editCompList"></div>
+      <button class="small" onclick="addEditCompRow()">+ Komponen</button>
+
+      <div class="actions">
+        <button onclick="document.getElementById('editDialog').close()">
+          Batal
+        </button>
+        <button class="primary" onclick="submitEdit()">Simpan</button>
+      </div>
+    </dialog>
+
+    <script>
+      const API = "http://localhost:4000/api";
+      // GANTI dengan project id yang sedang aktif (nanti bisa diambil dari query string / halaman project)
+      const PROJECT_ID =
+        new URLSearchParams(location.search).get("projectId") ||
+        "ISI_PROJECT_ID_DI_SINI";
+      let activeParentId = null;
+      let activeGroupId = null;
+      let PROJECT = null; // <-- TAMBAH
+      async function api(path, options = {}) {
+        const res = await fetch(`${API}${path}`, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(data?.error || `Gagal (${res.status})`);
+        return data;
+      }
+
+      function fmtRp(n) {
+        return (
+          "Rp " +
+          Number(n).toLocaleString("id-ID", { maximumFractionDigits: 0 })
+        );
+      }
+
+      async function loadProject() {
+        PROJECT = await api(`/projects/${PROJECT_ID}`);
+      }
+
+      async function loadTree() {
+        document.getElementById("status").textContent = "Memuat…";
+        try {
+          const project = await api(`/projects/${PROJECT_ID}`);
+          projectDiscipline = project.discipline;
+          projectGrade = project.grade;
+
+          // update label dropdown biar nunjukin HSPK yang beneran dipakai
+          const label = `HSPK ${project.hspkPeriod} — ${projectDiscipline || "-"} Grade ${projectGrade || "-"}`;
+          document.getElementById("masterOptionLabel").textContent = label;
+
+          // TAMBAH: render link pairing kalau ada
+          const pairEl = document.getElementById("pairLink");
+          if (project.pairedProjectId && project.pairedProject) {
+            const otherDiscipline =
+              project.pairedProject.discipline === "SIPIL"
+                ? "Interior"
+                : "Civil";
+            pairEl.innerHTML = `<a href="rab.html?projectId=${project.pairedProjectId}">Buka versi ${otherDiscipline} →</a>`;
+          } else {
+            pairEl.innerHTML = "";
+          }
+
+          const groups = await api(`/projects/${PROJECT_ID}/rab-groups`);
+          renderTree(groups);
+          document.getElementById("status").textContent =
+            `Project: ${project.name} (${label})`;
+        } catch (err) {
+          document.getElementById("status").textContent =
+            "Gagal memuat: " + err.message;
+        }
+      }
+
+      function setDiscipline(d) {
+        activeDiscipline = d;
+        document
+          .querySelectorAll("#disciplineTabs .filter-tab")
+          .forEach((btn) => {
+            btn.classList.remove("active");
+          });
+        event.target.classList.add("active");
+        loadTree();
+      }
+
+      function sumItems(items) {
+        return items.reduce((s, it) => s + Number(it.rabTotalPrice), 0);
+      }
+
+      function sumGroupRecursive(group) {
+        let total = sumItems(group.items || []);
+        for (const child of group.children || [])
+          total += sumGroupRecursive(child);
+        return total;
+      }
+
+      function renderGroup(g) {
+        const subtotal = sumGroupRecursive(g);
+        return `
+        <div class="group-row">
+          <div><span class="ref">${g.reference || ""}</span><span class="label">${escapeHtml(g.name)}</span></div>
+          <div>
+            <span style="font-family:monospace;margin-right:10px">${fmtRp(subtotal)}</span>
+            <button class="small" onclick="openGroupDialog('${g.id}')">+ Sub-Group</button>
+            <button class="small" onclick="openItemDialog('${g.id}')">+ Baris</button>
+            <button class="small danger" onclick="deleteGroup('${g.id}')">Hapus</button>
+          </div>
+        </div>
+        <div class="children">
+          ${(g.children || []).map(renderSubgroup).join("")}
+          ${(g.items || []).length ? renderItemsTable(g.items) : ""}
+        </div>
+      `;
+      }
+
+      function renderTree(groups) {
+        const el = document.getElementById("tree");
+        if (groups.length === 0) {
+          el.innerHTML = `<div class="empty-note">Belum ada Group Pekerjaan. Klik "+ Tambah Group Pekerjaan" untuk mulai.</div>`;
+          document.getElementById("grandTotal").textContent = fmtRp(0);
+          return;
+        }
+
+        let grand = 0;
+        el.innerHTML = groups
+          .map((g) => {
+            grand += sumGroupRecursive(g);
+            return renderGroup(g);
+          })
+          .join("");
+        document.getElementById("grandTotal").textContent = fmtRp(grand);
+      }
+
+      function renderItemsTable(items) {
+        let counter = 0;
+        return `
+        <table class="items">
+          <thead>
+            <tr><th>Ref</th><th>Uraian Pekerjaan</th><th>Disiplin</th><th>Satuan</th><th>Volume</th><th>RAP Satuan</th><th>RAP Total</th><th>RAB Satuan</th><th>RAB Total</th><th></th></tr>
+          </thead>
+          <tbody>
+            ${items
+              .map((it) => {
+                const isChild = !!it.bvItem?.parentBvItemId;
+                const namePrefix = isChild ? "&nbsp;&nbsp;&nbsp;&nbsp;- " : "";
+                const no = isChild ? "" : ++counter;
+                // Tambahkan ini untuk melihat data asli yang diterima dari Backend
+                console.log(
+                  "Cek Item:",
+                  it.name,
+                  "| ByOwner:",
+                  it.isByOwner,
+                  "| Stip:",
+                  it.isStip,
+                );
+                return `
+      <tr>
+        
+        <td>${it.reference || no || ">"}</td>
+        <td>${namePrefix}${escapeHtml(it.name)}</td>
+        <td>${it.discipline ? escapeHtml(it.discipline) + (it.grade ? "-" + it.grade : "") : "-"}</td>
+        <td>${escapeHtml(it.paymentUnit)}</td>
+        <td class="num">${Number(it.volume)}</td>
+        ${
+          it.isByOwner
+            ? `<td style="text-align: center; background-color: #ffe985;">By Owner</td>
+     <td style="text-align: center; background-color: #ffe985;">By Owner</td>
+     <td style="text-align: center; background-color: #ffe985;">By Owner</td>
+     <td style="text-align: center; background-color: #ffe985;">By Owner</td>`
+            : it.isStip
+              ? `<td style="text-align: center;">-</td>
+     <td style="text-align: center;">-</td>
+     <td style="text-align: center;">-</td>
+     <td style="text-align: center;">-</td>`
+              : `<td class="num">${fmtRp(it.rapUnitPrice)}</td>
+     <td class="num">${fmtRp(it.rapTotalPrice)}</td>
+     <td class="num">${fmtRp(it.rabUnitPrice)}</td>
+     <td class="num">${fmtRp(it.rabTotalPrice)}</td>`
+        }
+        <td>
+          <button class="small" onclick='openEditDialog(${JSON.stringify(it)})'>Edit</button>
+          <button class="small danger" onclick="deleteItem('${it.id}')">Hapus</button>
+        </td>
+      </tr>
+    `;
+              })
+              .join("")}
+          </tbody>
+        </table>
+      `;
+      }
+      function renderSubgroup(sg) {
+        const subtotal = sumGroupRecursive(sg);
+        return `
+        <div class="subgroup-row">
+          <div><span class="ref">${sg.reference || ""}</span><span class="label">${escapeHtml(sg.name)}</span></div>
+          <div>
+            <span style="font-family:monospace;margin-right:10px">${fmtRp(subtotal)}</span>
+            <button class="small" onclick="openItemDialog('${sg.id}')">+ Baris</button>
+            <button class="small danger" onclick="deleteGroup('${sg.id}')">Hapus</button>
+          </div>
+        </div>
+        ${(sg.children || []).length ? `<div class="children">${sg.children.map(renderSubgroup).join("")}</div>` : ""}
+        ${(sg.items || []).length ? renderItemsTable(sg.items) : ""}
+      `;
+      }
+      function escapeHtml(s) {
+        return String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      // ---- Group Dialog ----
+      function openGroupDialog(parentId) {
+        activeParentId = parentId;
+        document.getElementById("groupDialogTitle").textContent = parentId
+          ? "Tambah Sub-Group Pekerjaan"
+          : "Tambah Group Pekerjaan";
+        document.getElementById("groupName").value = "";
+        document.getElementById("groupRef").value = "";
+        document.getElementById("groupDialog").showModal();
+      }
+
+      async function submitGroup() {
+        const name = document.getElementById("groupName").value.trim();
+        const reference = document.getElementById("groupRef").value.trim();
+        if (!name) return alert("Nama wajib diisi.");
+        try {
+          await api(`/projects/${PROJECT_ID}/rab-groups`, {
+            method: "POST",
+            body: JSON.stringify({
+              name,
+              reference: reference || null,
+              parentId: activeParentId,
+            }),
+          });
+          document.getElementById("groupDialog").close();
+          loadTree();
+        } catch (err) {
+          alert("Gagal menyimpan: " + err.message);
+        }
+      }
+
+      async function deleteGroup(id) {
+        if (
+          !confirm(
+            "Hapus group ini? Semua sub-group dan baris pekerjaan di dalamnya akan ikut terhapus.",
+          )
+        )
+          return;
+        try {
+          await api(`/rab-groups/${id}`, { method: "DELETE" });
+          loadTree();
+        } catch (err) {
+          alert("Gagal menghapus: " + err.message);
+        }
+      }
+
+      // ---- Item Dialog ----
+      function openItemDialog(groupId) {
+        activeGroupId = groupId;
+        document.getElementById("itemMode").value = "master";
+        document.getElementById("jobSearch").value = "";
+        document.getElementById("jobResult").innerHTML = "";
+        document.getElementById("customName").value = "";
+        document.getElementById("customUnit").value = "";
+        document.getElementById("itemVolume").value = "";
+        document.getElementById("compList").innerHTML = "";
+        toggleItemMode();
+        document.getElementById("itemDialog").showModal();
+      }
+
+      function toggleItemMode() {
+        const mode = document.getElementById("itemMode").value;
+        document.getElementById("masterFields").style.display =
+          mode === "master" ? "block" : "none";
+        document.getElementById("customFields").style.display =
+          mode === "custom" ? "block" : "none";
+      }
+
+      let searchTimer = null;
+      async function searchJobs() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(async () => {
+          const q = document.getElementById("jobSearch").value.trim();
+          if (!q) return;
+          try {
+            const params = new URLSearchParams({ q });
+            if (projectDiscipline) params.set("discipline", projectDiscipline);
+            if (projectGrade) params.set("grade", projectGrade);
+            const jobs = await api(`/jobs?${params.toString()}`);
+            const sel = document.getElementById("jobResult");
+            sel.innerHTML = jobs
+              .slice(0, 30)
+              .map(
+                (j) =>
+                  `<option value="${j.id}">${escapeHtml(j.reference || "")} — ${escapeHtml(j.name)}</option>`,
+              )
+              .join("");
+          } catch (err) {
+            console.error(err);
+          }
+        }, 350);
+      }
+
+      function addCompRow() {
+        const div = document.createElement("div");
+        div.className = "comp-row";
+        div.innerHTML = `
+        <select class="c-section">
+          <option value="UPAH">Upah</option>
+          <option value="BAHAN">Bahan</option>
+          <option value="ALAT">Alat</option>
+        </select>
+        <input class="c-name" placeholder="nama">
+        <input class="c-unit" placeholder="satuan" style="max-width:70px">
+        <input class="c-coef" placeholder="koef" type="number" step="0.0001" style="max-width:80px">
+        <input class="c-price" placeholder="harga" type="number" style="max-width:100px">
+        <button class="small danger" onclick="this.parentElement.remove()">×</button>
+      `;
+        document.getElementById("compList").appendChild(div);
+      }
+
+      async function submitItem() {
+        const volume = Number(document.getElementById("itemVolume").value);
+        if (!volume || volume <= 0)
+          return alert("Volume wajib diisi dan harus lebih dari 0.");
+
+        const mode = document.getElementById("itemMode").value;
+        let body;
+
+        if (mode === "master") {
+          const sel = document.getElementById("jobResult");
+          if (!sel.value)
+            return alert("Pilih jenis pekerjaan dari hasil pencarian.");
+          body = { sourceJobTypeId: sel.value, volume, groupId: activeGroupId };
+        } else {
+          const name = document.getElementById("customName").value.trim();
+          const paymentUnit = document
+            .getElementById("customUnit")
+            .value.trim();
+          if (!name || !paymentUnit)
+            return alert("Nama dan satuan wajib diisi.");
+          const rows = [
+            ...document.querySelectorAll("#compList .comp-row"),
+          ].map((row) => ({
+            section: row.querySelector(".c-section").value,
+            name: row.querySelector(".c-name").value.trim(),
+            unit: row.querySelector(".c-unit").value.trim(),
+            coefficient: Number(row.querySelector(".c-coef").value),
+            unitPrice: Number(row.querySelector(".c-price").value),
+          }));
+          if (rows.length === 0) return alert("Tambahkan minimal 1 komponen.");
+          body = {
+            name,
+            paymentUnit,
+            volume,
+            groupId: activeGroupId,
+            components: rows,
+          };
+        }
+
+        try {
+          await api(`/projects/${PROJECT_ID}/rab-items`, {
+            method: "POST",
+            body: JSON.stringify(body),
+          });
+          document.getElementById("itemDialog").close();
+          loadTree();
+        } catch (err) {
+          alert("Gagal menyimpan: " + err.message);
+        }
+      }
+
+      async function deleteItem(id) {
+        if (!confirm("Hapus baris pekerjaan ini?")) return;
+        try {
+          await api(`/rab-items/${id}`, { method: "DELETE" });
+          loadTree();
+        } catch (err) {
+          alert("Gagal menghapus: " + err.message);
+        }
+      }
+
+      let editingItemId = null;
+
+      function openEditDialog(item) {
+        editingItemId = item.id;
+        const isFromMaster = !!item.sourceJobTypeId;
+
+        document.getElementById("editItemLabel").textContent =
+          `${item.name} — ${item.paymentUnit} — Vol: ${item.volume}`;
+
+        document.getElementById("editRapPrice").value = item.rapUnitPrice;
+        document.getElementById("editRabPrice").value = item.rabUnitPrice;
+
+        document.getElementById("editIsStip").value = "false";
+        document.getElementById("editRapPrice").disabled = false;
+        document.getElementById("editRabPrice").disabled = false;
+
+        document.getElementById("switchJobBtn").style.display = isFromMaster
+          ? "inline-block"
+          : "none";
+
+        document.getElementById("switchJobBox").style.display = "none";
+
+        const list = document.getElementById("editCompList");
+        list.innerHTML = "";
+        (item.components || []).forEach((c) => addEditCompRow(c));
+
+        document.getElementById("editDialog").showModal();
+      }
+
+      function toggleByOwner() {
+        const current =
+          document.getElementById("editIsByOwner").value === "true";
+        const next = !current;
+        document.getElementById("editIsByOwner").value = next;
+
+        document.getElementById("editRapPrice").disabled = next;
+        document.getElementById("editRabPrice").disabled = next;
+        if (next) {
+          document.getElementById("editRapPrice").value = 0;
+          document.getElementById("editRabPrice").value = 0;
+        }
+      }
+      function toggleStip() {
+        // Ambil state saat ini
+        const isStipInput = document.getElementById("editIsStip");
+        const current = isStipInput.value === "true";
+        const next = !current;
+
+        // Update state
+        isStipInput.value = next;
+
+        const rapInput = document.getElementById("editRapPrice");
+        const rabInput = document.getElementById("editRabPrice");
+
+        // Disable/enable input
+        rapInput.disabled = next;
+        rabInput.disabled = next;
+
+        // Ubah teks tombol (opsional)
+        const stipBtn =
+          event.currentTarget ||
+          document.querySelector('button[onclick="toggleStip()"]');
+        if (stipBtn)
+          stipBtn.textContent = next ? "Batal Set Stip" : "Set Harga Stip (-)";
+
+        if (next) {
+          // 1. UBAH TYPE KE "text" DULU AGAR BISA MENERIMA SIMBOL "-"
+          rapInput.type = "text";
+          rabInput.type = "text";
+
+          // 2. Set nilainya menjadi strip
+          rapInput.value = "-";
+          rabInput.value = "-";
+        } else {
+          // 1. KEMBALIKAN TYPE KE "number" KARENA MODE STIP MATI
+          rapInput.type = "number";
+          rabInput.type = "number";
+
+          // 2. Kembalikan nilainya ke 0 atau kosong
+          rapInput.value = 0;
+          rabInput.value = 0;
+        }
+      }
+      function addEditCompRow(comp) {
+        const div = document.createElement("div");
+        div.className = "comp-row";
+        div.innerHTML = `
+        <select class="ec-section">
+          <option value="UPAH" ${comp?.section === "UPAH" ? "selected" : ""}>Upah</option>
+          <option value="BAHAN" ${comp?.section === "BAHAN" ? "selected" : ""}>Bahan</option>
+          <option value="ALAT" ${comp?.section === "ALAT" ? "selected" : ""}>Alat</option>
+        </select>
+        <input class="ec-name" placeholder="nama" value="${comp?.name ?? ""}">
+        <input class="ec-unit" placeholder="satuan" style="max-width:70px" value="${comp?.unit ?? ""}">
+        <input class="ec-coef" placeholder="koef" type="number" step="0.0001" style="max-width:80px" value="${comp?.coefficient ?? ""}">
+        <input class="ec-price" placeholder="harga" type="number" style="max-width:100px" value="${comp?.unitPrice ?? ""}">
+        <button class="small danger" onclick="this.parentElement.remove()">×</button>
+      `;
+        document.getElementById("editCompList").appendChild(div);
+      }
+
+      async function submitEdit() {
+        // 1. Ambil kedua status
+        const isByOwner =
+          document.getElementById("editIsByOwner").value === "true";
+        const isStip = document.getElementById("editIsStip").value === "true"; // <-- TAMBAHKAN INI
+
+        // 2. Jika ByOwner atau Stip, paksa harga jadi 0 agar tidak error NaN
+        const rabUnitPrice =
+          isByOwner || isStip
+            ? 0
+            : Number(document.getElementById("editRabPrice").value);
+
+        // 3. VALIDASI UPDATE: Kecualikan juga isStip
+        if (!isByOwner && !isStip && (!rabUnitPrice || rabUnitPrice <= 0)) {
+          return alert("Harga RAB wajib diisi.");
+        }
+        const rows = [...document.querySelectorAll("#editCompList .comp-row")]
+          .map((row) => ({
+            section: row.querySelector(".ec-section").value,
+            name: row.querySelector(".ec-name").value.trim(),
+            unit: row.querySelector(".ec-unit").value.trim(),
+            coefficient: Number(row.querySelector(".ec-coef").value),
+            unitPrice: Number(row.querySelector(".ec-price").value),
+          }))
+          .filter((c) => c.name && c.unit);
+
+        const body = { rabUnitPrice, isByOwner, isStip };
+        if (rows.length > 0) {
+          body.components = rows;
+        } else if (!isByOwner) {
+          const rapUnitPrice = Number(
+            document.getElementById("editRapPrice").value,
+          );
+          if (rapUnitPrice > 0) body.rapUnitPrice = rapUnitPrice;
+        } else {
+          body.rapUnitPrice = 0;
+        }
+
+        try {
+          await api(`/rab-items/${editingItemId}`, {
+            method: "PUT",
+            body: JSON.stringify(body),
+          });
+          document.getElementById("editDialog").close();
+          loadTree();
+        } catch (err) {
+          alert("Gagal menyimpan: " + err.message);
+        }
+      }
+
+      function toggleSwitchJobBox() {
+        const box = document.getElementById("switchJobBox");
+        box.style.display = box.style.display === "none" ? "block" : "none";
+      }
+
+      let switchSearchTimer = null;
+      function searchSwitchJobs() {
+        clearTimeout(switchSearchTimer);
+        switchSearchTimer = setTimeout(async () => {
+          const q = document.getElementById("switchJobSearch").value.trim();
+          if (!q) return;
+          try {
+            const jobs = await api(`/jobs?q=${encodeURIComponent(q)}`);
+            const sel = document.getElementById("switchJobResult");
+            sel.innerHTML = jobs
+              .slice(0, 30)
+              .map(
+                (j) =>
+                  `<option value="${j.id}">${escapeHtml(j.reference || "")} — ${escapeHtml(j.name)}</option>`,
+              )
+              .join("");
+          } catch (err) {
+            console.error(err);
+          }
+        }, 350);
+      }
+
+      //export to excel
+      function exportRabExcel() {
+        window.location.href = `${API}/projects/${PROJECT_ID}/rab-items/export`;
+      }
+
+      function exportBvExcel() {
+        window.location.href = `${API}/projects/${PROJECT_ID}/bv-items/export`;
+      }
+
+      function exportFullExcel() {
+        window.location.href = `${API}/projects/${PROJECT_ID}/export-full`;
+      }
+      function scheduleExport() {
+        window.location.href = `${API}/projects/${PROJECT_ID}/time-schedule/export`;
+      }
+
+      function viewRab() {
+        window.open(`${API}/projects/${PROJECT_ID}/rab-items/view`, "_blank");
+      }
+
+      function exportRabCombined() {
+        window.location.href = `${API}/projects/${PROJECT_ID}/rab-items/export-combined`;
+      }
+
+      async function confirmSwitchJob() {
+        const sel = document.getElementById("switchJobResult");
+        if (!sel.value)
+          return alert("Pilih jenis pekerjaan dari hasil pencarian.");
+        if (
+          !confirm(
+            "Ganti jenis pekerjaan ini? Semua data (nama, satuan, komponen, RAP) akan diambil ulang dari master baru.",
+          )
+        )
+          return;
+
+        try {
+          await api(`/rab-items/${editingItemId}/switch-job`, {
+            method: "PUT",
+            body: JSON.stringify({ newJobTypeId: sel.value }),
+          });
+          document.getElementById("editDialog").close();
+          loadTree();
+        } catch (err) {
+          alert("Gagal mengganti: " + err.message);
+        }
+      }
+
+      loadProject().then(loadTree);
+    </script>
+  </body>
+</html>
