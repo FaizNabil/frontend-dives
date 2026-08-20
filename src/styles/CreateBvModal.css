@@ -77,17 +77,17 @@
 /* ================= TOOLBAR ================= */
 .bv-toolbar {
   display: flex;
-  gap: 12px; /* Dilebarkan sedikit karena sekarang ada 4 tombol */
+  gap: 12px; /* Dipertahankan: Dilebarkan sedikit karena sekarang ada 4 tombol */
   flex-wrap: wrap;
   margin: 20px 0 24px 0;
-  align-items: center; /* Memastikan semua tombol sejajar secara vertikal */
+  align-items: center; /* Dipertahankan: Memastikan semua tombol sejajar secara vertikal */
 }
 
 .bv-btn {
   background: transparent;
   border: 1px solid var(--bv-line-strong);
   color: var(--bv-text);
-  border-radius: 4px; /* Sedikit diperhalus */
+  border-radius: 4px; /* Dipertahankan: Sedikit diperhalus */
   padding: 9px 16px;
   font-size: 12.5px;
   font-family: var(--bv-sans);
@@ -109,7 +109,7 @@
 }
 
 .bv-btn:active {
-  transform: scale(0.96); /* Efek interaktif ditekan */
+  transform: scale(0.96); /* Dipertahankan: Efek interaktif ditekan */
 }
 
 .bv-btn:disabled {
@@ -322,7 +322,7 @@
 }
 
 .bv-inner-modal-wide {
-  width: 1040px;
+  width: 1220px; /* Diubah: Menggunakan lebar yang lebih luas (1220px) dari file CSS sebelumnya (bukan 1040px) agar layout grid breakdown yang rumit tidak tumpang tindih */
 }
 
 .bv-inner-modal h3 {
@@ -391,12 +391,26 @@
 }
 
 /* ---- Breakdown dinamis ---- */
+/* Diubah: Menggunakan layout flexbox yang terdefinisi di komponen JSX (inline style), 
+   jadi grid template ini dinonaktifkan atau disesuaikan agar tidak konflik */
 .bv-breakdown-row {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr repeat(10, 0.8fr) auto;
-  gap: 6px;
+  /* display: grid;  <-- Dinonaktifkan karena di JSX sudah pakai flex */
+  /* grid-template-columns: 1.1fr 0.9fr repeat(7, 0.85fr) repeat(3, 0.6fr) 0.7fr auto; */
+  /* gap: 6px; */
   margin-bottom: 8px;
+  /* align-items: center; */
+}
+
+/* Dipertahankan: Gaya untuk checkbox dimensi */
+.bv-dim-check {
+  display: flex;
   align-items: center;
+  gap: 4px;
+}
+
+.bv-dim-check input[type="checkbox"] {
+  flex-shrink: 0;
+  accent-color: var(--bv-gold, #d4af6a);
 }
 
 .bv-breakdown-row .bv-form-input {
@@ -507,12 +521,20 @@
     grid-template-columns: 1fr;
   }
 
+  /* Penyesuaian Flexbox untuk layar kecil */
   .bv-breakdown-row {
-    grid-template-columns: 1fr 1fr;
+     display: flex;
+     flex-direction: column;
+     align-items: flex-start;
   }
 
+  .bv-breakdown-row > * {
+      width: 100% !important; /* Memaksa elemen penuh secara horizontal */
+      margin-bottom: 6px;
+  }
+  
   .bv-breakdown-subtotal {
     text-align: left;
-    grid-column: 1 / -1;
+    margin-top: 10px;
   }
 }

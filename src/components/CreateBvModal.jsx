@@ -21,20 +21,18 @@ const MODE_HITUNG_OPTIONS = [
 ];
 
 // ============================================================================
-// RAB COMPONENT SECTION
-// ============================================================================
-const COMPONENT_SECTION_OPTIONS = [
-  { value: "BAHAN", label: "Bahan" },
-  { value: "UPAH", label: "Upah" },
-  { value: "ALAT", label: "Alat" },
-];
-
-// ============================================================================
-// BREAKDOWN
+// BREAKDOWN (Ditambahkan State Checkbox)
 // ============================================================================
 const emptyBreakdown = () => ({
   keterangan: "",
   modeHitung: "auto",
+  isPChecked: false,
+  isLChecked: false,
+  isTChecked: false,
+  isLuasChecked: false,
+  isKelilingChecked: false,
+  isDiameterChecked: false,
+  isBeratChecked: false,
   panjang: "",
   lebar: "",
   tinggi: "",
@@ -48,17 +46,6 @@ const emptyBreakdown = () => ({
 });
 
 // ============================================================================
-// RAB COMPONENT
-// ============================================================================
-const emptyRabComponent = () => ({
-  name: "",
-  unit: "",
-  section: "BAHAN",
-  coefficient: "",
-  unitPrice: "",
-});
-
-// ============================================================================
 // PREVIEW SUBTOTAL
 // ============================================================================
 function calcSubtotal(b) {
@@ -67,21 +54,14 @@ function calcSubtotal(b) {
   const bh = b.jumlahBh !== "" && b.jumlahBh != null ? Number(b.jumlahBh) : 1;
   const jumlah = sisi * bh;
 
+  // Catatan: Preview ini mengabaikan checkbox karena perhitungan pastinya dilakukan di Backend.
   const p = b.panjang !== "" && b.panjang != null ? Number(b.panjang) : 1;
   const t = b.tinggi !== "" && b.tinggi != null ? Number(b.tinggi) : 1;
 
-  if (b.berat !== "" && b.berat != null) {
-    return p * t * Number(b.berat) * jumlah * (1 + w);
-  }
-  if (b.luas !== "" && b.luas != null) {
-    return Number(b.luas) * jumlah * (1 + w);
-  }
-  if (b.keliling !== "" && b.keliling != null) {
-    return Number(b.keliling) * jumlah * (1 + w);
-  }
-  if (b.diameter !== "" && b.diameter != null) {
-    return Number(b.diameter) * jumlah * (1 + w);
-  }
+  if (b.berat !== "" && b.berat != null) return p * t * Number(b.berat) * jumlah * (1 + w);
+  if (b.luas !== "" && b.luas != null) return Number(b.luas) * jumlah * (1 + w);
+  if (b.keliling !== "" && b.keliling != null) return Number(b.keliling) * jumlah * (1 + w);
+  if (b.diameter !== "" && b.diameter != null) return Number(b.diameter) * jumlah * (1 + w);
 
   const l = b.lebar !== "" && b.lebar != null ? Number(b.lebar) : 1;
   return p * l * t * jumlah * (1 + w);
@@ -116,24 +96,8 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ==========================================================
-  // MODALS
-  // ==========================================================
   const [itemModal, setItemModal] = useState(null);
   const [nameModal, setNameModal] = useState(null);
-
-  /*
-    Format:
-    {
-      item,
-      rabUnitPrice,
-      groupId,
-      category,
-      reference,
-      overhead,
-      components: [...]
-    }
-  */
   const [linkModal, setLinkModal] = useState(null);
   const [exporting, setExporting] = useState(false);
 
@@ -145,9 +109,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
   const [jobTypeSearching, setJobTypeSearching] = useState(false);
   const [showJobTypeDropdown, setShowJobTypeDropdown] = useState(false);
 
-  // ==========================================================
-  // SEARCH HSPK
-  // ==========================================================
   useEffect(() => {
     if (!showJobTypeDropdown || jobTypeQuery.trim().length < 2) {
       setJobTypeResults([]);
@@ -158,7 +119,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
       setJobTypeSearching(true);
       try {
         const params = new URLSearchParams({ q: jobTypeQuery.trim() });
-
         if (hspkFilters.period) params.set("period", hspkFilters.period);
         if (hspkFilters.category) params.set("category", hspkFilters.category);
         if (hspkFilters.discipline) params.set("discipline", hspkFilters.discipline);
@@ -178,9 +138,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     return () => clearTimeout(timer);
   }, [jobTypeQuery, showJobTypeDropdown, hspkFilters.period, hspkFilters.category, hspkFilters.discipline, hspkFilters.grade]);
 
-  // ==========================================================
-  // SELECT HSPK
-  // ==========================================================
   const selectJobType = (jt) => {
     updateItemForm({
       name: jt.name,
@@ -191,9 +148,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     setShowJobTypeDropdown(false);
   };
 
-  // ==========================================================
-  // TYPE NAME
-  // ==========================================================
   const handleNameTyping = (value) => {
     setJobTypeQuery(value);
     setShowJobTypeDropdown(true);
@@ -230,9 +184,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     }
   };
 
-  // ==========================================================
-  // LOAD
-  // ==========================================================
   useEffect(() => {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -240,15 +191,12 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
 
   if (!isOpen) return null;
 
-  // ==========================================================
-  // GROUP
-  // ==========================================================
   const topGroups = groups.filter((g) => !g.parentId);
   const itemsOfGroup = (groupId) => items.filter((it) => it.groupId === groupId);
   const totalItemCount = items.length;
 
   // ==========================================================
-  // ADD GROUP
+  // ADD & DELETE GROUP
   // ==========================================================
   const openAddGroup = () => {
     setNameModal({ value: "" });
@@ -261,16 +209,10 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
       const res = await fetch(`${API_BASE}/projects/${projectId}/rab-groups`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: nameModal.value.trim(),
-          parentId: null,
-        }),
+        body: JSON.stringify({ name: nameModal.value.trim(), parentId: null }),
       });
 
-      if (!res.ok) {
-        throw new Error((await res.json())?.error || "Gagal menambah group.");
-      }
-
+      if (!res.ok) throw new Error((await res.json())?.error || "Gagal menambah group.");
       setNameModal(null);
       fetchAll();
     } catch (err) {
@@ -278,17 +220,11 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     }
   };
 
-  // ==========================================================
-  // DELETE GROUP
-  // ==========================================================
   const deleteGroup = async (groupId) => {
     if (!confirm("Hapus group ini beserta isinya?")) return;
-
     try {
       const res = await fetch(`${API_BASE}/rab-groups/${groupId}`, { method: "DELETE" });
-      if (!res.ok) {
-        throw new Error((await res.json())?.error || "Gagal menghapus group.");
-      }
+      if (!res.ok) throw new Error((await res.json())?.error || "Gagal menghapus group.");
       fetchAll();
     } catch (err) {
       alert(err.message);
@@ -296,7 +232,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
   };
 
   // ==========================================================
-  // ADD ITEM
+  // ADD, SUB, & EDIT ITEM
   // ==========================================================
   const openAddItem = (groupId, parentBvItemId = "", isCustom = false) => {
     setJobTypeQuery("");
@@ -308,28 +244,22 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     });
   };
 
-  // ==========================================================
-  // ADD SUB ITEM (DARI HEADER GROUP)
-  // ==========================================================
   const openAddSubItem = (groupId, isCustom = false) => {
     setJobTypeQuery("");
     setItemModal({
       editingId: null,
       isCustomMode: isCustom,
-      isSubItemMode: true, // Memunculkan dropdown Pilih Induk
+      isSubItemMode: true,
       form: { ...emptyItemForm(), groupId, parentBvItemId: "" },
     });
   };
 
-  // ==========================================================
-  // EDIT ITEM
-  // ==========================================================
   const openEditItem = (item) => {
     setJobTypeQuery(item.name || "");
     setItemModal({
       editingId: item.id,
       isCustomMode: !item.sourceJobTypeId,
-      isSubItemMode: !!item.parentBvItemId, // Jika dia punya parent, munculkan dropdown parent saat diedit
+      isSubItemMode: !!item.parentBvItemId,
       form: {
         name: item.name || "",
         paymentUnit: item.paymentUnit || "",
@@ -343,6 +273,13 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
           ? item.breakdowns.map((b) => ({
               keterangan: b.keterangan || "",
               modeHitung: b.modeHitung || "auto",
+              isPChecked: !!b.isPChecked,
+              isLChecked: !!b.isLChecked,
+              isTChecked: !!b.isTChecked,
+              isLuasChecked: !!b.isLuasChecked,
+              isKelilingChecked: !!b.isKelilingChecked,
+              isDiameterChecked: !!b.isDiameterChecked,
+              isBeratChecked: !!b.isBeratChecked,
               panjang: b.panjang ?? "",
               lebar: b.lebar ?? "",
               tinggi: b.tinggi ?? "",
@@ -359,16 +296,10 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     });
   };
 
-  // ==========================================================
-  // UPDATE ITEM FORM
-  // ==========================================================
   const updateItemForm = (patch) => {
     setItemModal((prev) => ({ ...prev, form: { ...prev.form, ...patch } }));
   };
 
-  // ==========================================================
-  // UPDATE BREAKDOWN
-  // ==========================================================
   const updateBreakdown = (index, patch) => {
     setItemModal((prev) => {
       const breakdowns = prev.form.breakdowns.map((b, i) => (i === index ? { ...b, ...patch } : b));
@@ -376,9 +307,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     });
   };
 
-  // ==========================================================
-  // ADD BREAKDOWN
-  // ==========================================================
   const addBreakdownRow = () => {
     setItemModal((prev) => ({
       ...prev,
@@ -386,9 +314,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     }));
   };
 
-  // ==========================================================
-  // REMOVE BREAKDOWN
-  // ==========================================================
   const removeBreakdownRow = (index) => {
     setItemModal((prev) => ({
       ...prev,
@@ -396,16 +321,12 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     }));
   };
 
-  // ==========================================================
-  // SAVE ITEM
-  // ==========================================================
   const submitItemModal = async () => {
     const f = itemModal.form;
 
     if (!f.isHeaderOnly && !f.name.trim()) return alert("Nama item wajib diisi.");
     if (!f.isHeaderOnly && !f.paymentUnit.trim()) return alert("Satuan wajib diisi.");
     
-    // Validasi pemilihan induk jika dalam mode sub-item
     if (itemModal.isSubItemMode && !f.parentBvItemId) {
       alert("Pilih Induk Pekerjaan terlebih dahulu.");
       return;
@@ -425,6 +346,13 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
         : f.breakdowns.map((b) => ({
             keterangan: b.keterangan || null,
             modeHitung: b.modeHitung || "auto",
+            isPChecked: !!b.isPChecked,
+            isLChecked: !!b.isLChecked,
+            isTChecked: !!b.isTChecked,
+            isLuasChecked: !!b.isLuasChecked,
+            isKelilingChecked: !!b.isKelilingChecked,
+            isDiameterChecked: !!b.isDiameterChecked,
+            isBeratChecked: !!b.isBeratChecked,
             panjang: numOrNull(b.panjang),
             lebar: numOrNull(b.lebar),
             tinggi: numOrNull(b.tinggi),
@@ -449,10 +377,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        throw new Error((await res.json())?.error || "Gagal menyimpan item BV.");
-      }
-
+      if (!res.ok) throw new Error((await res.json())?.error || "Gagal menyimpan item BV.");
       setItemModal(null);
       fetchAll();
     } catch (err) {
@@ -460,17 +385,11 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     }
   };
 
-  // ==========================================================
-  // DELETE ITEM
-  // ==========================================================
   const deleteItem = async (itemId) => {
     if (!confirm("Hapus item BV ini?")) return;
-
     try {
       const res = await fetch(`${API_BASE}/bv-items/${itemId}`, { method: "DELETE" });
-      if (!res.ok) {
-        throw new Error((await res.json())?.error || "Gagal menghapus item.");
-      }
+      if (!res.ok) throw new Error((await res.json())?.error || "Gagal menghapus item.");
       fetchAll();
     } catch (err) {
       alert(err.message);
@@ -478,7 +397,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
   };
 
   // ==========================================================
-  // LINK TO RAB
+  // LINK, SYNC, & UNLINK
   // ==========================================================
   const openLink = (item) => {
     setLinkModal({
@@ -488,113 +407,18 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
       category: "Pekerjaan Custom",
       reference: "",
       overhead: "0.1",
-      components: [emptyRabComponent()],
     });
   };
 
-  // ==========================================================
-  // UPDATE LINK MODAL
-  // ==========================================================
-  const updateLinkModal = (patch) => {
-    setLinkModal((prev) => ({ ...prev, ...patch }));
-  };
-
-  // ==========================================================
-  // ADD RAB COMPONENT
-  // ==========================================================
-  const addRabComponent = () => {
-    setLinkModal((prev) => ({ ...prev, components: [...prev.components, emptyRabComponent()] }));
-  };
-
-  // ==========================================================
-  // UPDATE RAB COMPONENT
-  // ==========================================================
-  const updateRabComponent = (index, patch) => {
-    setLinkModal((prev) => ({
-      ...prev,
-      components: prev.components.map((component, i) => (i === index ? { ...component, ...patch } : component)),
-    }));
-  };
-
-  // ==========================================================
-  // DELETE RAB COMPONENT
-  // ==========================================================
-  const removeRabComponent = (index) => {
-    setLinkModal((prev) => ({
-      ...prev,
-      components: prev.components.filter((_, i) => i !== index),
-    }));
-  };
-
-  // ==========================================================
-  // CALCULATE COMPONENT TOTAL
-  // ==========================================================
-  const calculateComponentTotal = (component) => {
-    const coefficient = Number(component.coefficient) || 0;
-    const unitPrice = Number(component.unitPrice) || 0;
-    return coefficient * unitPrice;
-  };
-
-  // ==========================================================
-  // CALCULATE ALL COMPONENT TOTAL
-  // ==========================================================
-  const calculateComponentsTotal = () => {
-    if (!linkModal?.components) return 0;
-    return linkModal.components.reduce((total, component) => total + calculateComponentTotal(component), 0);
-  };
-
-  // ==========================================================
-  // SUBMIT LINK
-  // ==========================================================
   const submitLink = async () => {
     if (!linkModal) return;
+    const { item, rabUnitPrice, groupId, category, reference, overhead } = linkModal;
 
-    const { item, rabUnitPrice, groupId, category, reference, overhead, components } = linkModal;
-
-    if (rabUnitPrice === "" || Number(rabUnitPrice) < 0) {
-      alert("Harga Satuan RAB wajib diisi.");
-      return;
-    }
-
-    if (!groupId) {
-      alert("Group RAB wajib dipilih.");
-      return;
-    }
-
-    const cleanedComponents = components
-      .filter((component) => component.name.trim() !== "")
-      .map((component) => ({
-        name: component.name.trim(),
-        unit: component.unit.trim(),
-        section: component.section,
-        coefficient: Number(component.coefficient),
-        unitPrice: Number(component.unitPrice),
-      }));
-
-    for (let i = 0; i < cleanedComponents.length; i++) {
-      const component = cleanedComponents[i];
-      if (!component.name) {
-        alert(`Nama komponen nomor ${i + 1} wajib diisi.`);
-        return;
-      }
-      if (!component.unit) {
-        alert(`Satuan komponen "${component.name}" wajib diisi.`);
-        return;
-      }
-      if (!Number.isFinite(component.coefficient) || component.coefficient < 0) {
-        alert(`Coefficient komponen "${component.name}" tidak valid.`);
-        return;
-      }
-      if (!Number.isFinite(component.unitPrice) || component.unitPrice < 0) {
-        alert(`Harga komponen "${component.name}" tidak valid.`);
-        return;
-      }
-    }
+    if (!groupId) return alert("Group RAB wajib dipilih.");
 
     const overheadNumber = Number(overhead);
     if (!Number.isFinite(overheadNumber) || overheadNumber < 0) {
-      alert("Overhead harus berupa angka >= 0.");
-      return;
+      return alert("Overhead harus berupa angka >= 0.");
     }
 
     const payload = {
@@ -603,7 +427,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
       category: category?.trim() || null,
       reference: reference?.trim() || null,
       overhead: overhead === "" ? null : Number(overhead),
-      components: item.sourceJobTypeId ? [] : cleanedComponents,
+      components: [], // Dikirim kosong sesuai penyederhanaan flow Top-Down
     };
 
     try {
@@ -614,10 +438,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
       });
 
       const json = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(json?.error || json?.message || "Gagal link BV ke RAB.");
-      }
+      if (!res.ok) throw new Error(json?.error || json?.message || "Gagal link BV ke RAB.");
 
       alert(json?.message || "BV berhasil di-link ke RAB.");
       setLinkModal(null);
@@ -627,15 +448,29 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
     }
   };
 
-  // ==========================================================
-  // SYNC
-  // ==========================================================
   const syncItem = async (itemId) => {
     try {
       const res = await fetch(`${API_BASE}/bv-items/${itemId}/sync`, { method: "POST" });
-      if (!res.ok) {
-        throw new Error((await res.json())?.error || "Gagal sync ke RAB.");
+      if (!res.ok) throw new Error((await res.json())?.error || "Gagal sync ke RAB.");
+      fetchAll();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const unlinkItem = async (itemId) => {
+    if (!confirm("Lepas link BV ini dari RAB?")) return;
+    try {
+      const res = await fetch(`${API_BASE}/bv-items/${itemId}/unlink`, { method: "POST" });
+      if (res.status === 403) {
+        const body = await res.json().catch(() => null);
+        alert(
+          body?.error ||
+          "UNLINK DITOLAK: Item ini sudah dikerjakan/diberi harga oleh Estimator (Pak Jim). Silakan hubungi Estimator untuk menghapus harga terlebih dahulu jika ingin merevisi struktur."
+        );
+        return;
       }
+      if (!res.ok) throw new Error((await res.json())?.error || "Gagal unlink item.");
       fetchAll();
     } catch (err) {
       alert(err.message);
@@ -672,9 +507,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
   // ==========================================================
   return (
     <div className="bv-panel">
-      {/* ======================================================
-          HEADER
-      ====================================================== */}
       <div className="bv-panel-header">
         <div>
           <h2 className="bv-title">BV — BACK UP VOLUME</h2>
@@ -682,18 +514,11 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
             Project: {projectName || "-"} ({hspkPeriodLabel || "-"}) — {totalItemCount} item BV
           </p>
         </div>
-        {onClose && (
-          <button className="bv-close-btn" onClick={onClose}>×</button>
-        )}
+        {onClose && <button className="bv-close-btn" onClick={onClose}>×</button>}
       </div>
 
-      {/* ======================================================
-          TOOLBAR
-      ====================================================== */}
       <div className="bv-toolbar">
-        <button className="bv-btn bv-btn-primary" onClick={openAddGroup}>
-          + Tambah Group Pekerjaan
-        </button>
+        <button className="bv-btn bv-btn-primary" onClick={openAddGroup}>+ Tambah Group Pekerjaan</button>
         <button className="bv-btn" onClick={() => openAddItem(topGroups[0]?.id)} disabled={topGroups.length === 0}>
           + Tambah Baris Pekerjaan
         </button>
@@ -702,49 +527,25 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
         </button>
       </div>
 
-      {/* ======================================================
-          LOADING
-      ====================================================== */}
       {loading && <p className="bv-empty">Memuat data BV...</p>}
       {error && <p className="bv-empty" style={{ color: "#c0392b" }}>{error}</p>}
 
-      {/* ======================================================
-          BODY
-      ====================================================== */}
       {!loading && !error && (
         <div className="bv-body">
           {topGroups.length === 0 && (
-            <p className="bv-empty">
-              Belum ada group pekerjaan. Klik "+ Tambah Group Pekerjaan" untuk mulai.
-            </p>
+            <p className="bv-empty">Belum ada group pekerjaan. Klik "+ Tambah Group Pekerjaan" untuk mulai.</p>
           )}
 
           {topGroups.map((group, gIndex) => (
             <div className="bv-group" key={group.id}>
               <div className="bv-group-header">
-                <span className="bv-group-title">
-                  {gIndex + 1}. {group.name}
-                </span>
-
+                <span className="bv-group-title">{gIndex + 1}. {group.name}</span>
                 <div className="bv-group-actions">
-                  <button className="bv-btn bv-btn-xs" onClick={() => openAddItem(group.id, "", false)}>
-                    + Baris
-                  </button>
-                  <button className="bv-btn bv-btn-xs bv-btn-custom" onClick={() => openAddItem(group.id, "", true)}>
-                    + Baris Custom
-                  </button>
-                  
-                  {/* --- TOMBOL SUB BARIS --- */}
-                  <button className="bv-btn bv-btn-xs" onClick={() => openAddSubItem(group.id, false)}>
-                    + Sub Baris
-                  </button>
-                  <button className="bv-btn bv-btn-xs bv-btn-custom" onClick={() => openAddSubItem(group.id, true)}>
-                    + Sub Baris Custom
-                  </button>
-
-                  <button className="bv-btn bv-btn-xs bv-btn-danger" onClick={() => deleteGroup(group.id)}>
-                    Hapus
-                  </button>
+                  <button className="bv-btn bv-btn-xs" onClick={() => openAddItem(group.id, "", false)}>+ Baris</button>
+                  <button className="bv-btn bv-btn-xs bv-btn-custom" onClick={() => openAddItem(group.id, "", true)}>+ Baris Custom</button>
+                  <button className="bv-btn bv-btn-xs" onClick={() => openAddSubItem(group.id, false)}>+ Sub Baris</button>
+                  <button className="bv-btn bv-btn-xs bv-btn-custom" onClick={() => openAddSubItem(group.id, true)}>+ Sub Baris Custom</button>
+                  <button className="bv-btn bv-btn-xs bv-btn-danger" onClick={() => deleteGroup(group.id)}>Hapus</button>
                 </div>
               </div>
 
@@ -756,6 +557,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
                   onDelete={deleteItem}
                   onLink={openLink}
                   onSync={syncItem}
+                  onUnlink={unlinkItem}
                 />
               )}
             </div>
@@ -805,9 +607,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
               Header saja (tanpa volume)
             </label>
 
-            {/* ==========================================================
-                DROPDOWN INDUK PEKERJAAN (HANYA MUNCUL JIKA KLIK + SUB)
-            ========================================================== */}
             {itemModal.isSubItemMode && (
               <label className="bv-form-label">
                 Pilih Induk Pekerjaan (Parent)
@@ -820,9 +619,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
                   {items
                     .filter((it) => it.groupId === itemModal.form.groupId && !it.parentBvItemId)
                     .map((parentItem) => (
-                      <option key={parentItem.id} value={parentItem.id}>
-                        {parentItem.name}
-                      </option>
+                      <option key={parentItem.id} value={parentItem.id}>{parentItem.name}</option>
                     ))}
                 </select>
               </label>
@@ -830,7 +627,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
 
             <label className="bv-form-label">
               Uraian Pekerjaan
-              {/* Badge penanda status HSPK / Custom */}
               {itemModal.isCustomMode && (
                 <span className="bv-hspk-badge" style={{ borderColor: 'var(--bv-ok)', color: 'var(--bv-ok)', background: 'var(--bv-ok-soft)' }}>
                   Custom
@@ -841,9 +637,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
               )}
 
               {itemModal.isCustomMode ? (
-                /* ==========================================================
-                   TAMPILAN JIKA MODE CUSTOM (INPUT BIASA, TANPA HSPK)
-                   ========================================================== */
                 <input
                   className="bv-form-input"
                   placeholder="Ketik uraian pekerjaan custom..."
@@ -852,9 +645,6 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
                   autoFocus
                 />
               ) : (
-                /* ==========================================================
-                   TAMPILAN JIKA MODE HSPK (DENGAN AUTOCOMPLETE)
-                   ========================================================== */
                 <div className="bv-autocomplete">
                   <input
                     className="bv-form-input"
@@ -920,34 +710,66 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
               <>
                 <p className="bv-form-label" style={{ marginBottom: 4 }}>Baris Breakdown Dimensi</p>
                 {itemModal.form.breakdowns.map((b, idx) => (
-                  <div key={idx} className="bv-breakdown-row">
-                    <input className="bv-form-input" placeholder="Keterangan" value={b.keterangan} onChange={(e) => updateBreakdown(idx, { keterangan: e.target.value })} />
-                    <select className="bv-form-input" value={b.modeHitung} onChange={(e) => updateBreakdown(idx, { modeHitung: e.target.value })}>
+                  <div key={idx} className="bv-breakdown-row" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <input className="bv-form-input" style={{ width: '120px' }} placeholder="Keterangan" value={b.keterangan} onChange={(e) => updateBreakdown(idx, { keterangan: e.target.value })} />
+                    
+                    <select className="bv-form-input" style={{ width: '100px' }} value={b.modeHitung} onChange={(e) => updateBreakdown(idx, { modeHitung: e.target.value })}>
                       {MODE_HITUNG_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                       ))}
                     </select>
-                    <input type="number" className="bv-form-input" placeholder="Panjang" value={b.panjang} onChange={(e) => updateBreakdown(idx, { panjang: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Lebar" value={b.lebar} onChange={(e) => updateBreakdown(idx, { lebar: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Tinggi" value={b.tinggi} onChange={(e) => updateBreakdown(idx, { tinggi: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Luas" value={b.luas} onChange={(e) => updateBreakdown(idx, { luas: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Keliling" value={b.keliling} onChange={(e) => updateBreakdown(idx, { keliling: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Diameter" value={b.diameter} onChange={(e) => updateBreakdown(idx, { diameter: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Berat" value={b.berat} onChange={(e) => updateBreakdown(idx, { berat: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Jml Sisi" value={b.jumlahSisi} onChange={(e) => updateBreakdown(idx, { jumlahSisi: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Jml Bh" value={b.jumlahBh} onChange={(e) => updateBreakdown(idx, { jumlahBh: e.target.value })} />
-                    <input type="number" className="bv-form-input" placeholder="Waste %" value={b.waste} onChange={(e) => updateBreakdown(idx, { waste: e.target.value })} />
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="P" checked={b.isPChecked} onChange={(e) => updateBreakdown(idx, { isPChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="P" value={b.panjang} onChange={(e) => updateBreakdown(idx, { panjang: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="L" checked={b.isLChecked} onChange={(e) => updateBreakdown(idx, { isLChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="L" value={b.lebar} onChange={(e) => updateBreakdown(idx, { lebar: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="T" checked={b.isTChecked} onChange={(e) => updateBreakdown(idx, { isTChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="T" value={b.tinggi} onChange={(e) => updateBreakdown(idx, { tinggi: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="Luas" checked={b.isLuasChecked} onChange={(e) => updateBreakdown(idx, { isLuasChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="Luas" value={b.luas} onChange={(e) => updateBreakdown(idx, { luas: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="Keliling" checked={b.isKelilingChecked} onChange={(e) => updateBreakdown(idx, { isKelilingChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="Kel" value={b.keliling} onChange={(e) => updateBreakdown(idx, { keliling: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="Diameter" checked={b.isDiameterChecked} onChange={(e) => updateBreakdown(idx, { isDiameterChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="Dia" value={b.diameter} onChange={(e) => updateBreakdown(idx, { diameter: e.target.value })} />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="checkbox" title="Berat" checked={b.isBeratChecked} onChange={(e) => updateBreakdown(idx, { isBeratChecked: e.target.checked })} />
+                      <input type="number" className="bv-form-input" style={{ width: '70px' }} placeholder="Berat" value={b.berat} onChange={(e) => updateBreakdown(idx, { berat: e.target.value })} />
+                    </div>
+
+                    <input type="number" className="bv-form-input" style={{ width: '60px' }} placeholder="Jml Sisi" value={b.jumlahSisi} onChange={(e) => updateBreakdown(idx, { jumlahSisi: e.target.value })} />
+                    <input type="number" className="bv-form-input" style={{ width: '60px' }} placeholder="Jml Bh" value={b.jumlahBh} onChange={(e) => updateBreakdown(idx, { jumlahBh: e.target.value })} />
+                    <input type="number" className="bv-form-input" style={{ width: '60px' }} placeholder="Waste %" value={b.waste} onChange={(e) => updateBreakdown(idx, { waste: e.target.value })} />
+                    
                     <span className="bv-breakdown-subtotal">= {calcSubtotal(b).toFixed(2)}</span>
+                    
                     <button className="bv-btn bv-btn-xs bv-btn-danger" onClick={() => removeBreakdownRow(idx)} disabled={itemModal.form.breakdowns.length === 1}>
                       Hapus
                     </button>
                   </div>
                 ))}
-                <button className="bv-btn bv-btn-xs" onClick={addBreakdownRow}>+ Baris Breakdown</button>
+                <button className="bv-btn bv-btn-xs" style={{ marginTop: 8 }} onClick={addBreakdownRow}>+ Baris Breakdown</button>
               </>
             )}
 
-            <div className="bv-inner-modal-actions">
+            <div className="bv-inner-modal-actions" style={{ marginTop: 16 }}>
               <button className="bv-btn" onClick={() => setItemModal(null)}>Batal</button>
               <button className="bv-btn bv-btn-primary" onClick={submitItemModal}>
                 {itemModal.editingId ? "Simpan Perubahan" : "Tambah"}
@@ -958,16 +780,16 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
       )}
 
       {/* ======================================================
-          LINK TO RAB MODAL
+          LINK TO RAB MODAL (Disederhanakan Top-Down)
       ====================================================== */}
       {linkModal && (
         <div className="bv-inner-overlay">
-          <div className="bv-inner-modal bv-inner-modal-wide bv-link-rab-modal">
+          <div className="bv-inner-modal">
             <h3>Link ke RAB</h3>
             <p className="bv-form-hint">Item BV: <strong> {linkModal.item?.name}</strong></p>
 
             <label className="bv-form-label">
-              Harga Satuan RAB
+              Harga Modal (RAP) per Satuan
               <input
                 type="number"
                 min="0"
@@ -1015,7 +837,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
             </label>
 
             <label className="bv-form-label">
-              Overhead
+              Overhead (Profit)
               <input
                 type="number"
                 min="0"
@@ -1030,82 +852,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
               </span>
             </label>
 
-            <div className="bv-rab-components-header">
-              <div>
-                <h4>Komponen RAB</h4>
-                <p className="bv-form-hint">
-                  Masukkan bahan, upah, dan alat pembentuk harga pelaksanaan.
-                </p>
-              </div>
-              <button type="button" className="bv-btn bv-btn-xs bv-btn-primary" onClick={addRabComponent}>
-                + Tambah Komponen
-              </button>
-            </div>
-
-            <div className="bv-rab-components">
-              {linkModal.components.map((component, index) => (
-                <div className="bv-rab-component-row" key={index}>
-                  <input
-                    type="text"
-                    className="bv-form-input"
-                    placeholder="Nama komponen"
-                    value={component.name}
-                    onChange={(e) => updateRabComponent(index, { name: e.target.value })}
-                  />
-                  <input
-                    type="text"
-                    className="bv-form-input"
-                    placeholder="Satuan"
-                    value={component.unit}
-                    onChange={(e) => updateRabComponent(index, { unit: e.target.value })}
-                  />
-                  <select
-                    className="bv-form-input"
-                    value={component.section}
-                    onChange={(e) => updateRabComponent(index, { section: e.target.value })}
-                  >
-                    {COMPONENT_SECTION_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.0001"
-                    className="bv-form-input"
-                    placeholder="Coefficient"
-                    value={component.coefficient}
-                    onChange={(e) => updateRabComponent(index, { coefficient: e.target.value })}
-                  />
-                  <input
-                    type="number"
-                    min="0"
-                    className="bv-form-input"
-                    placeholder="Harga Satuan"
-                    value={component.unitPrice}
-                    onChange={(e) => updateRabComponent(index, { unitPrice: e.target.value })}
-                  />
-                  <div className="bv-component-total">
-                    Rp {new Intl.NumberFormat("id-ID").format(calculateComponentTotal(component))}
-                  </div>
-                  <button type="button" className="bv-btn bv-btn-xs bv-btn-danger" onClick={() => removeRabComponent(index)}>
-                    Hapus
-                  </button>
-                </div>
-              ))}
-              {linkModal.components.length === 0 && (
-                <div className="bv-form-hint">
-                  Belum ada komponen. Klik "+ Tambah Komponen".
-                </div>
-              )}
-            </div>
-
-            <div className="bv-rab-component-summary">
-              <span>Total Komponen:</span>
-              <strong>Rp {new Intl.NumberFormat("id-ID").format(calculateComponentsTotal())}</strong>
-            </div>
-
-            <div className="bv-inner-modal-actions">
+            <div className="bv-inner-modal-actions" style={{ marginTop: 16 }}>
               <button className="bv-btn" onClick={() => setLinkModal(null)}>Batal</button>
               <button className="bv-btn bv-btn-primary" onClick={submitLink}>Link ke RAB</button>
             </div>
@@ -1119,7 +866,7 @@ function CreateBvModal({ isOpen, onClose, projectId, projectName, hspkPeriodLabe
 // ============================================================================
 // BV TABLE
 // ============================================================================
-function BvTable({ groupNo, items, onEdit, onDelete, onLink, onSync }) {
+function BvTable({ groupNo, items, onEdit, onDelete, onLink, onSync, onUnlink }) {
   const statusLabel = (status) => {
     if (status === "SUDAH_SINKRON") return "Sudah di-link";
     if (status === "BELUM_SINKRON") return "Belum sinkron";
@@ -1130,9 +877,6 @@ function BvTable({ groupNo, items, onEdit, onDelete, onLink, onSync }) {
     return status === "SUDAH_SINKRON" ? "bv-status-ok" : "bv-status-warn";
   };
 
-  // ==========================================================
-  // RENDER ITEM
-  // ==========================================================
   const renderItem = (item, parentNo, indexInParent) => {
     const no = `${parentNo}.${indexInParent}`;
     const breakdowns = item.breakdowns || [];
@@ -1177,13 +921,13 @@ function BvTable({ groupNo, items, onEdit, onDelete, onLink, onSync }) {
             {item.linkStatus === "BELUM_SINKRON" && (
               <button className="bv-btn bv-btn-xs" onClick={() => onSync(item.id)}>Sync</button>
             )}
+            {(item.linkStatus === "SUDAH_SINKRON" || item.linkStatus === "BELUM_SINKRON") && (
+              <button className="bv-btn bv-btn-xs" onClick={() => onUnlink(item.id)}>Unlink</button>
+            )}
             <button className="bv-btn bv-btn-xs bv-btn-danger" onClick={() => onDelete(item.id)}>Hapus</button>
           </td>
         </tr>
 
-        {/* ====================================================
-            DETAIL BREAKDOWN
-        ==================================================== */}
         {detailBreakdowns.map((b, i) => (
           <tr key={`${item.id}-b${i}`} className="bv-detail-row">
             <td />
@@ -1209,9 +953,6 @@ function BvTable({ groupNo, items, onEdit, onDelete, onLink, onSync }) {
           </tr>
         ))}
 
-        {/* ====================================================
-            CHILD
-        ==================================================== */}
         {(item.children || []).map((child, ci) => renderItem(child, no, ci + 1))}
       </Fragment>
     );

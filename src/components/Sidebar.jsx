@@ -14,6 +14,7 @@ import {
   Timeline,
   ClipboardCheck,
   CopyMinus,
+  Map // <-- Tambahan icon Map untuk Data Survey
 } from "lucide-react";
 
 import CreateProjectModal from "./CreateProjectModal";
@@ -115,6 +116,27 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
             >
               <Upload className="nav-icon" />
               <span>Upload HSPK</span>
+            </a>
+          </li>
+          
+          {/* ====================================================
+              DATA SURVEY
+          ==================================================== */}
+
+          <li
+            className={`nav-item ${
+              activeTab === "data-survey" ? "active" : ""
+            }`}
+          >
+            <a
+              href="#data-survey"
+              className="nav-link"
+              onClick={(e) =>
+                handleNavigation(e, "data-survey")
+              }
+            >
+              <Map className="nav-icon" />
+              <span>Data Survey</span>
             </a>
           </li>
 

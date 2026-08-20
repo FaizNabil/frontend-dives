@@ -15,17 +15,11 @@ import {
   Plus,
 } from 'lucide-react';
 import CreateProjectModal from './CreateProjectModal';
-import UploadHspk from './UploadHspk';
-import CreateBvModal from './CreateBvModal';
-// Single source of truth for the endpoint, used by both GET and POST below.
-// Adjust this if your backend uses a different URL.
+
 const API_URL = 'http://localhost:4000/api/projects';
 
-// onViewDetails(projectId) dipanggil dari App.jsx untuk pindah ke halaman detail.
-// onCreateBv(projectId, projectName) dipanggil dari App.jsx untuk pindah ke tab
-// 'bv' (Buat BV), scoped ke project ini - sama pola kayak onViewDetails, bukan
-// modal lokal lagi.
-const Dashboard = ({ onViewDetails, onCreateBv }) => {
+// Ditambahkan prop `onCreateSurvey` untuk navigasi ke tab/halaman Survey
+const Dashboard = ({ onViewDetails, onCreateBv, onCreateSurvey }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -53,11 +47,6 @@ const Dashboard = ({ onViewDetails, onCreateBv }) => {
     fetchProjects();
   }, []);
 
-  // Derived from real data - empty list naturally gives 0 everywhere, and
-  // these update automatically whenever fetchProjects runs again (e.g.
-  // after a project is created). Phase matching assumes the same string
-  // convention already used below for the table (PLANNING / CONSTRUCTION /
-  // ISSUE DETECTED); adjust if your backend uses different phase values.
   const totalActive = data.length;
   const planningCount = data.filter(
     (p) => (p.phase || 'PLANNING').toUpperCase() === 'PLANNING'
@@ -71,7 +60,6 @@ const Dashboard = ({ onViewDetails, onCreateBv }) => {
 
   return (
     <div className="dashboard-wrapper">
-
       {/* ================= TOP NAVBAR ================= */}
       <header className="top-navbar">
         <div className="navbar-greeting">
@@ -102,7 +90,6 @@ const Dashboard = ({ onViewDetails, onCreateBv }) => {
 
       {/* ================= CONTENT AREA ================= */}
       <div className="dashboard-content">
-
         {/* Stats Cards Row */}
         <div className="stats-grid">
           <div className="stat-card">
@@ -150,6 +137,9 @@ const Dashboard = ({ onViewDetails, onCreateBv }) => {
               <h3>Recent Active Projects</h3>
             </div>
             <div className="projects-actions">
+              <button className="icon-btn" onClick={() => setIsModalOpen(true)}>
+                <Plus size={18} /> New Project
+              </button>
               <button className="icon-btn"><Filter size={18} /></button>
               <button className="icon-btn"><MoreVertical size={18} /></button>
             </div>
@@ -181,40 +171,62 @@ const Dashboard = ({ onViewDetails, onCreateBv }) => {
                     <td colSpan={6} className="text-center text-gray">No projects yet. Click "New Project" to add one.</td>
                   </tr>
                 ) : (
-                  data.map((project, index) => (
-                    <tr key={project.id ?? index}>
-                      <td className="fw-bold">{project.name}</td>
-                      <td className="text-gray">{project.client?.name}</td>
-                      <td className="text-gray">{project.location}</td>
-                      <td>
-                        <div className="progress-container">
-                          <div className="progress-bar">
-                            <div className="progress-fill" style={{ width: `${project.progress ?? 0}%` }}></div>
+                  data.map((project, index) => {
+                    // Logika penentu status Survey dari backend
+                    const hasSurvey = project.hasSurvey || (project.surveys && project.surveys.length > 0);
+
+                    return (
+                      <tr key={project.id ?? index}>
+                        <td className="fw-bold">{project.name}</td>
+                        <td className="text-gray">{project.client?.name}</td>
+                        <td className="text-gray">{project.location}</td>
+                        <td>
+                          <div className="progress-container">
+                            <div className="progress-bar">
+                              <div className="progress-fill" style={{ width: `${project.progress ?? 0}%` }}></div>
+                            </div>
+                            <span className="progress-text">{project.progress ?? 0}%</span>
                           </div>
-                          <span className="progress-text">{project.progress ?? 0}%</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`phase-badge ${project.phaseClass || 'phase-planning'}`}>
-                          {project.phase || 'PLANNING'}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn-view-details"
-                          onClick={() => onViewDetails?.(project.id)}
-                        >
-                          VIEW DETAILS
-                        </button>
-                        <button
-                          className="btn-create-bv"
-                          onClick={() => onCreateBv?.(project.id, project.name)}
-                        >
-                          CREATE BV
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td>
+                          <span className={`phase-badge ${project.phaseClass || 'phase-planning'}`}>
+                            {project.phase || 'PLANNING'}
+                          </span>
+                        </td>
+                        <td style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <button
+                            className="btn-view-details"
+                            onClick={() => onViewDetails?.(project.id)}
+                          >
+                            VIEW DETAILS
+                          </button>
+                          
+                          {/* Tombol Create Survey Baru */}
+                          <button
+                            className="btn-view-details"
+                            style={{ backgroundColor: '#2b2b2b', color: '#fff', borderColor: '#444' }}
+                            onClick={() => onCreateSurvey?.(project.id, project.name)}
+                          >
+                            CREATE SURVEY
+                          </button>
+
+                          {/* Tombol Create BV (Disabled jika belum ada survey) */}
+                          <button
+                            className="btn-create-bv"
+                            onClick={() => onCreateBv?.(project.id, project.name)}
+                            disabled={!hasSurvey}
+                            title={!hasSurvey ? "Survey harus diinput terlebih dahulu" : "Create BV"}
+                            style={{
+                              opacity: !hasSurvey ? 0.5 : 1,
+                              cursor: !hasSurvey ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            CREATE BV
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -229,7 +241,6 @@ const Dashboard = ({ onViewDetails, onCreateBv }) => {
             </div>
           </div>
         </div>
-
       </div>
 
       <CreateProjectModal
