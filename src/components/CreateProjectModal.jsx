@@ -6,12 +6,14 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
   const [projectName, setProjectName] = useState("");
   const [client, setClient] = useState("");
   const [location, setLocation] = useState("");
+  
+  // State baru untuk filter disiplin
+  const [selectedDiscipline, setSelectedDiscipline] = useState("");
+  
   const [selectedComboIndex, setSelectedComboIndex] = useState("");
   const [hspkOptions, setHspkOptions] = useState([]);
   const [hspkLoading, setHspkLoading] = useState(true);
 
-  // Combos have no id field, just period/discipline/grade - selection is
-  // tracked by array position, resolved back to the real combo on submit.
   useEffect(() => {
     const fetchHspk = async () => {
       try {
@@ -26,22 +28,37 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
         setHspkLoading(false);
       }
     };
-    fetchHspk();
-  }, []);
+    if (isOpen) {
+      fetchHspk();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  // Filter HSPK berdasarkan disiplin yang dipilih user
+  const filteredHspkOptions = hspkOptions.filter((combo) => {
+    if (!selectedDiscipline) return false;
+    return combo.discipline?.toUpperCase() === selectedDiscipline.toUpperCase();
+  });
+
+  // Handler saat disiplin diubah (Sipil -> Interior atau sebaliknya)
+  const handleDisciplineChange = (e) => {
+    setSelectedDiscipline(e.target.value);
+    setSelectedComboIndex(""); // Reset pilihan combo agar index tidak meleset
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const selectedCombo = hspkOptions[Number(selectedComboIndex)];
+    // Mengambil combo berdasarkan array yang sudah difilter
+    const selectedCombo = filteredHspkOptions[Number(selectedComboIndex)];
 
     if (!selectedCombo?.period) {
-      alert('Pilih data HSPK dulu.');
+      alert("Pilih data HSPK dulu.");
       return;
     }
     if (!projectName.trim() || !location.trim() || !client.trim()) {
-      alert('Semua field wajib diisi.');
+      alert("Semua field wajib diisi.");
       return;
     }
 
@@ -67,9 +84,11 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
 
       alert("Project berhasil dibuat!");
 
+      // Reset form
       setProjectName("");
       setClient("");
       setLocation("");
+      setSelectedDiscipline("");
       setSelectedComboIndex("");
 
       if (onProjectCreated) {
@@ -127,6 +146,21 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                 />
               </div>
 
+              {/* Input Pilihan Disiplin Pekerjaan */}
+              <div className="form-group full">
+                <label>Kategori Pekerjaan</label>
+                <select
+                  value={selectedDiscipline}
+                  onChange={handleDisciplineChange}
+                  required
+                >
+                  <option value="" disabled>-- Pilih Kategori --</option>
+                  <option value="SIPIL">Sipil</option>
+                  <option value="INTERIOR">Interior</option>
+                </select>
+              </div>
+
+              {/* Input Pilihan Data HSPK (Muncul mengikuti Filter di atas) */}
               <div className="form-group full">
                 <label htmlFor="hspkCombo">Pilih Data HSPK</label>
                 <select
@@ -134,11 +168,16 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                   value={selectedComboIndex}
                   onChange={(e) => setSelectedComboIndex(e.target.value)}
                   required
+                  disabled={!selectedDiscipline} // Disable kalau belum pilih disiplin
                 >
                   <option value="" disabled>
-                    {hspkLoading ? "-- memuat --" : "-- pilih --"}
+                    {hspkLoading
+                      ? "-- memuat --"
+                      : !selectedDiscipline
+                      ? "-- Pilih kategori pekerjaan dulu --"
+                      : "-- pilih data HSPK --"}
                   </option>
-                  {hspkOptions.map((combo, index) => (
+                  {filteredHspkOptions.map((combo, index) => (
                     <option key={index} value={index}>
                       {combo.period} — {combo.discipline} — Grade {combo.grade}
                     </option>

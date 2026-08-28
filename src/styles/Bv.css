@@ -1,6 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap');
 
 .bv-page {
+  /* 1. MENGGESER KIRI: Dorong halaman agar tidak masuk ke bawah sidebar */
+  margin-left: var(--sidebar-width);
+  
+  /* 2. Batasi lebarnya persis sisa layar, jangan 100% */
+  width: calc(100% - var(--sidebar-width));
+  
+  /* 2. MENGUNCI KANAN: Cegah tabel lebar menjebol layar ke kanan (offside) */
+  max-width: 100%;
+  min-width: 0;
+  
+  /* 3. STYLING BAWAAN ANDA */
+  box-sizing: border-box;
   min-height: 100vh;
   background: #0c0c0c;
   color: #ece3d2;
@@ -88,6 +100,33 @@
 }
 
 @media (max-width: 960px) {
-  .bv-page { padding: 24px; }
+  .bv-page { 
+    padding: 24px; 
+    
+    /* [DITAMBAHKAN] Kembalikan margin dan width ke ukuran normal di layar HP/Tablet */
+    margin-left: 0;
+    width: 100%;
+  }
   .bv-page-header { flex-direction: column; }
+}
+
+.btn-back {
+  background: transparent;
+  border: 1px solid rgba(212, 175, 106, 0.32);
+  color: #ece3d2;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.btn-back:hover {
+  border-color: #d4af6a;
+  color: #d4af6a;
+  background: rgba(212, 175, 106, 0.1);
 }

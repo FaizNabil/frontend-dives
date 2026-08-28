@@ -6,6 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* Variabel tema dibatasi ke .sidebar biar gak bentrok sama file CSS lain */
+:root {
+  --sidebar-width: 250px; /* Ubah angka ini sesuai lebar sidebar asli Anda */
+}
 .sidebar {
   --bg-sidebar: #0c0b09;
   --bg-surface: #17140f;
@@ -22,6 +25,14 @@
   --font-body: 'Manrope', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
+  /* --- TAMBAHAN UNTUK FIXED SIDEBAR --- */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Memastikan sidebar selalu di atas konten lain */
+  overflow-y: auto; /* Memungkinkan scroll di dalam sidebar jika menu terlalu panjang */
+  /* ------------------------------------ */
+  
   width: 260px;
   height: 100vh;
   background-color: var(--bg-sidebar);
@@ -58,7 +69,7 @@
   font-weight: 600;
 }
 
-/* Navigasi */
+/* Navigasi Utama */
 .sidebar-nav {
   flex: 1;
   display: flex;
@@ -102,7 +113,7 @@
   opacity: 0.8;
 }
 
-/* Styling Menu Aktif (Project Board) — aksen garis emas di sisi kiri */
+/* Styling Menu Aktif (Menu Utama) */
 .nav-item.active {
   background-color: var(--active-bg);
   border: 1px solid var(--active-border);
@@ -127,6 +138,89 @@
 .nav-item.active .nav-icon {
   color: var(--accent-gold-bright);
   opacity: 1;
+}
+
+/* ====================================================
+   DROPDOWN & SUB-MENU STYLES (BARU)
+==================================================== */
+.has-dropdown {
+  flex-direction: column;
+}
+
+/* Tombol Toggle Dropdown */
+.dropdown-toggle {
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  color: var(--text-gray);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dropdown-toggle:hover,
+.dropdown-toggle.dropdown-open {
+  background-color: var(--bg-hover);
+  color: var(--text-light);
+}
+
+.dropdown-toggle.dropdown-open {
+  color: var(--accent-gold-bright);
+}
+
+.dropdown-toggle .chevron {
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Container Sub-Menu */
+.sub-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sub-nav-list.open {
+  max-height: 400px; /* Sesuaikan ukuran maksimal agar animasi halus */
+}
+
+/* Item Sub-Menu */
+.sub-nav-item {
+  margin: 4px 0;
+}
+
+.sub-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 42px; /* Indentasi: Padding kiri 42px */
+  color: var(--text-gray);
+  text-decoration: none;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.sub-nav-link:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-light);
+}
+
+/* Menu Sub-Menu Aktif */
+.sub-nav-item.active .sub-nav-link {
+  background-color: var(--active-bg);
+  color: var(--accent-gold-bright);
+  border: 1px solid var(--active-border);
 }
 
 /* Tombol + Create Project */
@@ -157,15 +251,13 @@
   margin-right: 8px;
 }
 
-
-
 /* Footer Sidebar */
 .sidebar-footer {
   margin-top: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nav-item, .create-btn {
+  .nav-item, .create-btn, .sub-nav-list, .dropdown-toggle {
     transition: none !important;
   }
 }

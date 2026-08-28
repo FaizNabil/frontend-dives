@@ -1,4 +1,9 @@
 .tsp-page {
+  /* --- TAMBAHKAN DUA BARIS INI --- */
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  /* ------------------------------- */
+
   background: #f3f4f6;
   min-height: 100vh;
   padding: 24px;
@@ -451,6 +456,11 @@ thead .tsp-sticky-col {
 @media (max-width: 768px) {
   .tsp-page {
     padding: 14px;
+
+    /* --- TAMBAHKAN RESET INI --- */
+    margin-left: 0;
+    width: 100%;
+    
   }
 
   .tsp-controls-row {
@@ -464,4 +474,4 @@ thead .tsp-sticky-col {
   .tsp-title {
     font-size: 19px;
   }
-}
+} 

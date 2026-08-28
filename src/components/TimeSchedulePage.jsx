@@ -79,12 +79,10 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
   const [notice, setNotice] = useState(null);
 
   // ==========================================================
-  // STATE: START DATE & DISCIPLINE FILTER
+  // STATE: START DATE
   // ==========================================================
   const [startDateInput, setStartDateInput] = useState("");
   const [savingStartDate, setSavingStartDate] = useState(false);
-  const [disciplineInput, setDisciplineInput] = useState("");
-  const [appliedDiscipline, setAppliedDiscipline] = useState("");
 
   // ==========================================================
   // STATE: ITEM SCHEDULE DRAFTS & CHART
@@ -153,7 +151,7 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
   // ==========================================================
   // FETCH: TIME SCHEDULE
   // ==========================================================
-  const fetchSchedule = useCallback(async (selectedProjectId, discipline = "") => {
+  const fetchSchedule = useCallback(async (selectedProjectId) => {
     if (!selectedProjectId) {
       setData(null);
       return;
@@ -163,9 +161,7 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
     setError(null);
 
     try {
-      const url = buildApiUrl(apiBaseUrl, `/projects/${selectedProjectId}/time-schedule`, {
-        discipline: discipline || undefined,
-      });
+      const url = buildApiUrl(apiBaseUrl, `/projects/${selectedProjectId}/time-schedule`);
       const res = await fetch(url);
       const json = await parseJsonSafe(res);
 
@@ -184,17 +180,17 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
     }
   }, [apiBaseUrl]);
 
-  // Trigger fetch when project or discipline filter changes
+  // Trigger fetch when project changes
   useEffect(() => {
     if (projectId) {
-      fetchSchedule(projectId, appliedDiscipline);
+      fetchSchedule(projectId);
     } else {
       setData(null);
     }
-  }, [projectId, appliedDiscipline, fetchSchedule]);
+  }, [projectId, fetchSchedule]);
 
   // ==========================================================
-  // HANDLERS: PROJECT & FILTERS
+  // HANDLERS: PROJECT & DRAFTS
   // ==========================================================
   const handleProjectChange = (e) => {
     const newProjectId = e.target.value || null;
@@ -203,14 +199,6 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
     setError(null);
     setEditDrafts({});
     setHoverPoint(null);
-    setAppliedDiscipline("");
-    setDisciplineInput("");
-  };
-
-  const handleApplyFilter = () => setAppliedDiscipline(disciplineInput.trim());
-  const handleResetFilter = () => {
-    setDisciplineInput("");
-    setAppliedDiscipline("");
   };
 
   // ==========================================================
@@ -220,20 +208,7 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
     if (!projectId) {
       return showNotice("error", "Pilih project terlebih dahulu untuk di-export.");
     }
-
-    // Membangun URL untuk endpoint export tunggal
     const url = buildApiUrl(apiBaseUrl, `/projects/${projectId}/time-schedule/export`);
-    
-    // Membuka URL di tab baru agar browser otomatis memulai proses download file Excel
-    window.open(url, "_blank");
-  };
-
-  // (Opsional) Jika Anda ingin tombol untuk export combined (Sipil + Interior)
-  const handleExportCombined = () => {
-    if (!projectId) {
-      return showNotice("error", "Pilih project terlebih dahulu untuk di-export.");
-    }
-    const url = buildApiUrl(apiBaseUrl, `/projects/${projectId}/time-schedule/export-combined`);
     window.open(url, "_blank");
   };
 
@@ -259,7 +234,7 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
       }
 
       showNotice("success", json?.message || "Tanggal mulai proyek berhasil disimpan.");
-      await fetchSchedule(projectId, appliedDiscipline);
+      await fetchSchedule(projectId);
     } catch (err) {
       showNotice("error", err.message || "Gagal menyimpan tanggal mulai.");
     } finally {
@@ -322,7 +297,7 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
       if (!res.ok) throw new Error(json?.error || json?.message || `Gagal menyimpan jadwal (status ${res.status})`);
 
       showNotice("success", json?.message || `Jadwal "${item.name}" berhasil disimpan.`);
-      await fetchSchedule(projectId, appliedDiscipline);
+      await fetchSchedule(projectId);
     } catch (err) {
       showNotice("error", err.message || "Gagal menyimpan jadwal.");
     } finally {
@@ -345,7 +320,7 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
         delete next[item.rabItemId];
         return next;
       });
-      await fetchSchedule(projectId, appliedDiscipline);
+      await fetchSchedule(projectId);
     } catch (err) {
       showNotice("error", err.message || "Gagal menghapus jadwal.");
     } finally {
@@ -493,7 +468,6 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-          {/* Chevron dibuat dengan CSS supaya tidak membutuhkan import icon tambahan */}
           <span className="rab-project-select-icon">▼</span>
         </div>
         {projectError && <div className="tsp-field-error">{projectError}</div>}
@@ -520,17 +494,16 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
           ) : error ? (
             <div className="tsp-card tsp-empty-state tsp-error-state">
               <p>{error}</p>
-              <button className="tsp-btn tsp-btn-primary" onClick={() => fetchSchedule(projectId, appliedDiscipline)}>
+              <button className="tsp-btn tsp-btn-primary" onClick={() => fetchSchedule(projectId)}>
                 Coba Lagi
               </button>
             </div>
           ) : (
             <>
               {/* ==============================================
-                  START DATE + DISCIPLINE
+                  START DATE
               ============================================== */}
               <div className="tsp-controls-row">
-                {/* START DATE */}
                 <div className="tsp-card tsp-control-card">
                   <h2 className="tsp-card-title">Tanggal Mulai Proyek</h2>
                   <div className="tsp-control-row">
@@ -538,16 +511,6 @@ function TimeSchedulePage({ projectId: initialProjectId = null, apiBaseUrl = DEF
                     <button className="tsp-btn tsp-btn-primary" onClick={handleSaveStartDate} disabled={savingStartDate}>
                       {savingStartDate ? "Menyimpan..." : "Simpan Tanggal Mulai"}
                     </button>
-                  </div>
-                </div>
-
-                {/* DISCIPLINE */}
-                <div className="tsp-card tsp-control-card">
-                  <h2 className="tsp-card-title">Filter Disiplin</h2>
-                  <div className="tsp-control-row">
-                    <input type="text" className="tsp-input" placeholder="mis. Sipil, Arsitektur..." value={disciplineInput} onChange={(e) => setDisciplineInput(e.target.value)} />
-                    <button className="tsp-btn tsp-btn-secondary" onClick={handleApplyFilter}>Terapkan Filter</button>
-                    <button className="tsp-btn tsp-btn-ghost" onClick={handleResetFilter}>Reset</button>
                   </div>
                 </div>
               </div>

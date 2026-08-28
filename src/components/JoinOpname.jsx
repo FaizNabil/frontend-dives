@@ -927,7 +927,7 @@ function JoinOpnamePage({
               FILTER BAR
           ================================================== */}
 
-          <div className="jo-card jo-filter-card">
+          {/* <div className="jo-card jo-filter-card">
 
             <div className="jo-filter-group">
 
@@ -1013,7 +1013,7 @@ function JoinOpnamePage({
 
             </div>
 
-          </div>
+          </div> */}
 
           {/* ==================================================
               PROJECT INFORMATION

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import '../styles/ViewDetails.css';
+import "../styles/ViewDetails.css";
 import {
   ArrowLeft,
   MapPin,
