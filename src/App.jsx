@@ -358,7 +358,12 @@ const [editingSurveyId, setEditingSurveyId] = useState(null);
             onSaved={() => {
               setEditingSurveyId(null); 
               setActiveTab("data-survey"); // Ganti jadi "data-survey" untuk balik ke list
-            }} 
+            }}
+onCancel={() => {
+      // Fungsi ini yang memicu tombol kembali muncul
+      setEditingSurveyId(null); 
+      setActiveTab("data-survey"); 
+    }} 
           />
         )}
 

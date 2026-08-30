@@ -1044,7 +1044,7 @@
 }
 
 /* =========================================================
-   PROJECT DETAILS MODAL
+  PROJECT DETAILS MODAL
 ========================================================= */
 
 .pd-overlay {
@@ -1419,7 +1419,7 @@
 }
 
 /* ==========================================================
-   EDIT PROJECT MODAL
+  EDIT PROJECT MODAL
    ========================================================== */
 
 .edit-project-overlay {
@@ -1467,7 +1467,7 @@
 }
 
 /* ==========================================================
-   HEADER
+  HEADER
    ========================================================== */
 
 .edit-modal-header {
@@ -1533,7 +1533,7 @@
 }
 
 /* ==========================================================
-   ERROR
+  ERROR
    ========================================================== */
 
 .edit-modal-error {
@@ -1552,79 +1552,90 @@
 }
 
 /* ==========================================================
-   FORM
+  FORM (REVISI SELECT & FULL WIDTH)
    ========================================================== */
 
 .edit-project-form {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   gap: 18px;
-
   padding: 26px 28px 28px;
 }
 
 .edit-form-group {
   display: flex;
   flex-direction: column;
-
   gap: 8px;
 }
 
-.edit-form-group:first-child {
+/* Membuat elemen pertama dan yang memiliki class 'full' menjadi 1 baris penuh */
+.edit-form-group:first-child,
+.edit-form-group.full {
   grid-column: 1 / -1;
 }
 
 .edit-form-group label {
   color: #b4aea4;
-
   font-size: 11px;
   font-weight: 700;
-
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.edit-form-group input {
+/* Terapkan styling ke input dan select */
+.edit-form-group input,
+.edit-form-group select {
   width: 100%;
   box-sizing: border-box;
-
   padding: 12px 14px;
-
   outline: none;
-
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-
   background: #191714;
-
   color: #eee8db;
-
   font-size: 14px;
-
+  font-family: var(--font-body);
   transition: 0.2s ease;
+}
+
+/* Kustomisasi khusus untuk dropdown (select) */
+.edit-form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  /* Icon panah dropdown berwarna emas redup */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23b4aea4%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px top 50%;
+  background-size: 10px auto;
+  padding-right: 32px;
+}
+
+.edit-form-group select option {
+  background-color: #191714;
+  color: #eee8db;
 }
 
 .edit-form-group input::placeholder {
   color: #5f5b55;
 }
 
-.edit-form-group input:focus {
+.edit-form-group input:focus,
+.edit-form-group select:focus {
   border-color: rgba(196, 159, 71, 0.65);
-
   background: #1d1a16;
-
   box-shadow: 0 0 0 3px rgba(196, 159, 71, 0.08);
 }
 
-.edit-form-group input:disabled {
+.edit-form-group input:disabled,
+.edit-form-group select:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
 /* ==========================================================
-   FOOTER
+  FOOTER
    ========================================================== */
 
 .edit-modal-footer {
@@ -1700,7 +1711,7 @@
 }
 
 /* ==========================================================
-   SPINNER
+  SPINNER
    ========================================================== */
 
 .button-spinner {
@@ -1714,7 +1725,7 @@
 }
 
 /* ==========================================================
-   RESPONSIVE
+  RESPONSIVE (EDIT MODAL)
    ========================================================== */
 
 @media (max-width: 700px) {
@@ -1730,7 +1741,8 @@
     grid-template-columns: 1fr;
   }
 
-  .edit-form-group:first-child {
+  .edit-form-group:first-child,
+  .edit-form-group.full {
     grid-column: auto;
   }
 
@@ -1747,7 +1759,7 @@
 }
 
 /* =========================================================
-   RESPONSIVE
+  RESPONSIVE (DASHBOARD)
 ========================================================= */
 @media (max-width: 800px) {
   .dashboard-wrapper {
@@ -1755,6 +1767,31 @@
     width: 100%;
   }
 
+  .top-navbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .navbar-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-content {
+    padding: 20px;
+  }
+
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .projects-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -1765,40 +1802,6 @@
 
   .project-actions-cell {
     min-width: 420px;
-  }
-}
-
-@media (max-width: 800px) {
-  .top-navbar {
-    flex-direction: column;
-
-    align-items: stretch;
-
-    gap: 20px;
-  }
-
-  .navbar-actions {
-    justify-content: flex-start;
-
-    flex-wrap: wrap;
-  }
-
-  .dashboard-content {
-    padding: 20px;
-  }
-
-  .projects-header {
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    gap: 16px;
-  }
-
-  .projects-actions {
-    width: 100%;
-
-    flex-wrap: wrap;
   }
 }
 

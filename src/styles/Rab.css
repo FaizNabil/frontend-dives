@@ -7,8 +7,9 @@
    VARIABEL GLOBAL (UNTUK SIDEBAR)
 ========================================================= */
 :root {
-  --sidebar-width: 250px; /* Ubah angka ini sesuai lebar sidebar asli Anda */
+  --sidebar-width: 250px;
 }
+
 .rab-wrapper {
   --rab-bg: #0c0b09;
   --rab-surface: #17140f;
@@ -24,6 +25,7 @@
   --rab-muted: #a89c85;
 
   --rab-danger: #c1483c;
+  --rab-success: #10b981; /* Tambahan untuk status success */
 
   min-height: 100vh;
   margin-left: var(--sidebar-width);
@@ -49,571 +51,329 @@
     sans-serif;
 }
 
-
 /* =========================================================
    HEADER
 ========================================================= */
-
 .rab-header {
   display: grid;
-
-  grid-template-columns:
-    auto
-    minmax(0, 1fr)
-    auto;
-
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
-
   gap: 24px;
-
   padding-bottom: 30px;
-
-  border-bottom:
-    1px solid
-    rgba(201, 162, 75, 0.35);
-
+  border-bottom: 1px solid rgba(201, 162, 75, 0.35);
   margin-bottom: 34px;
 }
-
 
 /* =========================================================
    BACK BUTTON
 ========================================================= */
-
 .rab-back-btn {
   display: inline-flex;
-
   align-items: center;
   justify-content: center;
-
   gap: 8px;
-
   background: transparent;
-
-  border:
-    1px solid
-    var(--rab-border);
-
-  color:
-    var(--rab-text);
-
+  border: 1px solid var(--rab-border);
+  color: var(--rab-text);
   border-radius: 5px;
-
   padding: 10px 15px;
-
   min-height: 40px;
-
   white-space: nowrap;
-
   font-size: 13px;
-
   cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .rab-back-btn:hover {
-  border-color:
-    var(--rab-gold);
-
-  color:
-    var(--rab-gold-bright);
-
-  background:
-    rgba(201, 162, 75, 0.08);
+  border-color: var(--rab-gold);
+  color: var(--rab-gold-bright);
+  background: rgba(201, 162, 75, 0.08);
 }
-
 
 /* =========================================================
    HEADER MAIN
 ========================================================= */
-
 .rab-header-main {
   min-width: 0;
-
   padding-top: 1px;
 }
 
 .rab-eyebrow {
   margin: 0 0 8px;
-
-  color:
-    var(--rab-gold);
-
-  font-family:
-    "JetBrains Mono",
-    monospace;
-
+  color: var(--rab-gold);
+  font-family: "JetBrains Mono", monospace;
   font-size: 11px;
-
   font-weight: 600;
-
   letter-spacing: 0.16em;
-
   text-transform: uppercase;
 }
 
 .rab-title {
   margin: 0;
-
-  color:
-    var(--rab-text);
-
-  font-family:
-    "Fraunces",
-    Georgia,
-    serif;
-
-  font-size: clamp(
-    2rem,
-    3vw,
-    3rem
-  );
-
+  color: var(--rab-text);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(2rem, 3vw, 3rem);
   line-height: 1.05;
-
   font-weight: 500;
-
   white-space: nowrap;
 }
 
 .rab-subtitle {
   max-width: 520px;
-
-  margin:
-    12px 0 0;
-
-  color:
-    var(--rab-muted);
-
+  margin: 12px 0 0;
+  color: var(--rab-muted);
   font-size: 14px;
-
   line-height: 1.55;
 }
 
 .rab-pair-link {
   margin-top: 12px;
-
   padding: 0;
-
   border: none;
-
   background: transparent;
-
-  color:
-    var(--rab-gold);
-
+  color: var(--rab-gold);
   font-size: 12px;
-
   font-weight: 600;
-
   cursor: pointer;
-
   transition: color 0.2s ease;
 }
 
 .rab-pair-link:hover {
-  color:
-    var(--rab-gold-bright);
+  color: var(--rab-gold-bright);
 }
-
 
 /* =========================================================
    PROJECT PICKER
-   IMPORTANT:
-   Desktop = 320px
-   Tidak memenuhi header
 ========================================================= */
-
 .rab-project-picker {
   position: relative;
-
   width: 320px;
-
   max-width: 320px;
-
   flex-shrink: 0;
 }
 
 .rab-project-select {
   appearance: none;
-
   width: 100%;
-
   height: 46px;
-
   box-sizing: border-box;
-
-  padding:
-    0 42px 0 15px;
-
-  background:
-    #11100f;
-
-  border:
-    1px solid
-    #38342f;
-
+  padding: 0 42px 0 15px;
+  background: #11100f;
+  border: 1px solid #38342f;
   border-radius: 8px;
-
-  color:
-    #f3eee5;
-
-  font-family:
-    "Manrope",
-    "Segoe UI",
-    sans-serif;
-
+  color: #f3eee5;
+  font-family: "Manrope", "Segoe UI", sans-serif;
   font-size: 14px;
-
   outline: none;
-
   cursor: pointer;
-
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .rab-project-select:hover {
-  border-color:
-    var(--rab-gold-dim);
+  border-color: var(--rab-gold-dim);
 }
 
 .rab-project-select:focus {
-  border-color:
-    var(--rab-gold);
-
-  background:
-    #15130f;
-
-  box-shadow:
-    0 0 0 2px
-    rgba(201, 162, 75, 0.08);
+  border-color: var(--rab-gold);
+  background: #15130f;
+  box-shadow: 0 0 0 2px rgba(201, 162, 75, 0.08);
 }
 
 .rab-project-select:disabled {
   opacity: 0.6;
-
   cursor: not-allowed;
 }
 
 .rab-project-select option {
-  background:
-    #17140f;
-
-  color:
-    #f2ead9;
+  background: #17140f;
+  color: #f2ead9;
 }
 
 .rab-project-select-icon {
   position: absolute;
-
   right: 14px;
-
   top: 50%;
-
-  transform:
-    translateY(-50%);
-
+  transform: translateY(-50%);
   pointer-events: none;
-
-  color:
-    var(--rab-gold);
+  color: var(--rab-gold);
 }
 
-
 /* =========================================================
-   MAIN CONTENT
+   MAIN CONTENT & EMPTY STATE
 ========================================================= */
-
 .rab-content {
   display: flex;
-
   flex-direction: column;
-
   gap: 24px;
-
   min-width: 0;
 }
 
-
-/* =========================================================
-   EMPTY STATE
-========================================================= */
-
 .rab-empty-state {
   min-height: 240px;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: center;
-
   text-align: center;
-
   padding: 35px;
-
   box-sizing: border-box;
-
-  background:
-    var(--rab-surface);
-
-  border:
-    1px solid
-    var(--rab-border);
-
+  background: var(--rab-surface);
+  border: 1px solid var(--rab-border);
   border-radius: 6px;
 }
 
 .rab-empty-icon {
-  color:
-    var(--rab-gold-dim);
+  color: var(--rab-gold-dim);
 }
 
 .rab-empty-state h3 {
-  margin:
-    15px 0 8px;
-
-  color:
-    var(--rab-text);
-
-  font-family:
-    "Fraunces",
-    Georgia,
-    serif;
-
+  margin: 15px 0 8px;
+  color: var(--rab-text);
+  font-family: "Fraunces", Georgia, serif;
   font-size: 22px;
-
   font-weight: 500;
 }
 
 .rab-empty-state p {
   max-width: 600px;
-
   margin: 0;
-
-  color:
-    var(--rab-muted);
-
+  color: var(--rab-muted);
   font-size: 14px;
-
   line-height: 1.6;
 }
 
 .rab-empty-state span {
   margin-top: 10px;
-
-  color:
-    #6d6658;
-
+  color: #6d6658;
   font-size: 12px;
 }
 
-
-/* =========================================================
-   COMMON PLATE
-========================================================= */
-
 .rab-plate {
-  background:
-    var(--rab-surface);
-
-  border:
-    1px solid
-    var(--rab-border);
-
+  background: var(--rab-surface);
+  border: 1px solid var(--rab-border);
   border-radius: 5px;
-
   box-sizing: border-box;
 }
 
-
 /* =========================================================
-   TOOLBAR
+   TOOLBAR & BULK ACTIONS
 ========================================================= */
-
 .rab-toolbar {
   display: flex;
-
   align-items: center;
-
   flex-wrap: wrap;
-
   gap: 10px;
 }
 
 .rab-refresh-btn {
   display: inline-flex;
-
   align-items: center;
-
   gap: 6px;
 }
 
+/* KHUSUS TOOLBAR SAPU JAGAT (DARK/GOLD THEME) */
+.rab-toolbar-bulk {
+  padding: 12px 16px;
+  background: rgba(201, 162, 75, 0.05); /* Emas transparan */
+  border: 1px solid var(--rab-gold-dim);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.rab-toolbar-bulk strong {
+  font-size: 12px;
+  color: var(--rab-gold-bright);
+  margin-right: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
 
 /* =========================================================
-   STATS
+   STATS & SEARCH
 ========================================================= */
-
 .rab-stats-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
-
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 
 .rab-stat-header {
   display: flex;
-
   align-items: center;
-
   gap: 8px;
-
-  padding:
-    20px 20px 0;
+  padding: 20px 20px 0;
 }
 
 .rab-stat-icon {
-  color:
-    var(--rab-gold);
+  color: var(--rab-gold);
 }
 
 .rab-stat-label {
-  color:
-    var(--rab-gold-dim);
-
-  font-family:
-    "JetBrains Mono",
-    monospace;
-
+  color: var(--rab-gold-dim);
+  font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-
   font-weight: 600;
-
   letter-spacing: 0.1em;
-
   text-transform: uppercase;
 }
 
 .rab-stat-value {
-  padding:
-    14px 20px 2px;
-
-  color:
-    var(--rab-text);
-
-  font-family:
-    "Fraunces",
-    Georgia,
-    serif;
-
+  padding: 14px 20px 2px;
+  color: var(--rab-text);
+  font-family: "Fraunces", Georgia, serif;
   font-size: 23px;
-
   font-weight: 500;
 }
 
 .rab-stat-desc {
-  padding:
-    0 20px 20px;
-
-  color:
-    var(--rab-muted);
-
+  padding: 0 20px 20px;
+  color: var(--rab-muted);
   font-size: 12px;
-
   line-height: 1.4;
 }
 
 .rab-plate.is-danger {
-  border-color:
-    rgba(
-      193,
-      72,
-      60,
-      0.4
-    );
+  border-color: rgba(193, 72, 60, 0.4);
 }
-
-.rab-plate.is-danger
-  .rab-stat-value,
-.rab-plate.is-danger
-  .rab-stat-icon {
-  color:
-    var(--rab-danger);
+.rab-plate.is-danger .rab-stat-value,
+.rab-plate.is-danger .rab-stat-icon {
+  color: var(--rab-danger);
 }
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
 
 .rab-search-plate {
-  padding:
-    12px 16px;
+  padding: 12px 16px;
 }
-
 .rab-search-box {
   display: flex;
-
   align-items: center;
-
   gap: 9px;
 }
-
 .rab-search-icon {
-  color:
-    var(--rab-muted);
-
+  color: var(--rab-muted);
   flex-shrink: 0;
 }
-
 .rab-search-box input {
   width: 100%;
-
   min-width: 0;
-
   background: transparent;
-
   border: none;
-
   outline: none;
-
-  color:
-    var(--rab-text);
-
-  font-family:
-    "Manrope",
-    sans-serif;
-
+  color: var(--rab-text);
+  font-family: "Manrope", sans-serif;
   font-size: 14px;
 }
-
 .rab-search-box input::placeholder {
-  color:
-    #6f6655;
+  color: #6f6655;
 }
 
-
 /* =========================================================
-   TREE
+   TREE & GROUP ROWS
 ========================================================= */
-
 .rab-tree-plate {
   padding: 22px;
-
   overflow-x: auto;
 }
 
@@ -624,721 +384,373 @@
 .rab-group-row,
 .rab-subgroup-row {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   gap: 16px;
-
-  padding:
-    12px 14px;
-
-  background:
-    #1a1712;
-
-  border:
-    1px solid
-    var(--rab-border);
-
+  padding: 12px 14px;
+  background: #1a1712;
+  border: 1px solid var(--rab-border);
   border-radius: 5px;
 }
-
 .rab-subgroup-row {
-  background:
-    #15120f;
+  background: #15120f;
 }
 
 .rab-ref {
   display: block;
-
   margin-bottom: 4px;
-
-  color:
-    var(--rab-gold-dim);
-
-  font-family:
-    "JetBrains Mono",
-    monospace;
-
+  color: var(--rab-gold-dim);
+  font-family: "JetBrains Mono", monospace;
   font-size: 10px;
 }
-
 .rab-group-label {
-  color:
-    var(--rab-gold-bright);
-
+  color: var(--rab-gold-bright);
   font-size: 14px;
-
   font-weight: 600;
 }
-
 .rab-group-actions {
   display: flex;
-
   align-items: center;
-
   gap: 10px;
-
   flex-shrink: 0;
 }
-
 .rab-group-subtotal {
-  color:
-    var(--rab-text);
-
-  font-family:
-    "JetBrains Mono",
-    monospace;
-
+  color: var(--rab-text);
+  font-family: "JetBrains Mono", monospace;
   font-size: 12px;
 }
-
 
 /* =========================================================
-   ITEMS TABLE
+   ITEMS TABLE & CHECKBOX
 ========================================================= */
-
 .rab-items-table {
   width: 100%;
-
   min-width: 1000px;
-
   margin-top: 10px;
-
   border-collapse: collapse;
 }
-
 .rab-items-table th {
   padding: 10px;
-
-  background:
-    #12110f;
-
-  border-bottom:
-    1px solid
-    var(--rab-border);
-
-  color:
-    var(--rab-gold-dim);
-
-  font-family:
-    "JetBrains Mono",
-    monospace;
-
+  background: #12110f;
+  border-bottom: 1px solid var(--rab-border);
+  color: var(--rab-gold-dim);
+  font-family: "JetBrains Mono", monospace;
   font-size: 10px;
-
   font-weight: 600;
-
   letter-spacing: 0.05em;
-
   text-transform: uppercase;
-
   text-align: left;
-
   white-space: nowrap;
 }
-
 .rab-items-table td {
   padding: 10px;
-
-  border-bottom:
-    1px solid
-    var(--rab-border-soft);
-
-  color:
-    var(--rab-text);
-
+  border-bottom: 1px solid var(--rab-border-soft);
+  color: var(--rab-text);
   font-size: 12px;
-
   vertical-align: middle;
 }
-
 .rab-items-table tbody tr {
-  transition:
-    background-color 0.2s ease;
+  transition: background-color 0.2s ease;
+}
+.rab-items-table tbody tr:hover {
+  background: rgba(201, 162, 75, 0.04);
+}
+.rab-row-selected {
+  background: rgba(201, 162, 75, 0.12) !important;
 }
 
-.rab-items-table tbody tr:hover {
-  background:
-    rgba(201, 162, 75, 0.04);
+/* CHECKBOX STYLING */
+.rab-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--rab-border);
+  border-radius: 3px;
+  background: var(--rab-surface-alt);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rab-checkbox:checked {
+  background: var(--rab-gold);
+  border-color: var(--rab-gold);
+}
+.rab-checkbox:checked::after {
+  content: '✔';
+  position: absolute;
+  color: #17140f;
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .rab-row-actions {
   white-space: nowrap;
 }
-
 .rab-mono {
-  font-family:
-    "JetBrains Mono",
-    monospace;
+  font-family: "JetBrains Mono", monospace;
 }
-
 .rab-fw-bold {
   font-weight: 700;
 }
-
 .rab-special-cell {
-  color:
-    var(--rab-gold);
-
+  color: var(--rab-gold);
   font-weight: 600;
 }
-
 .rab-text-center {
   text-align: center;
 }
 
-
 /* =========================================================
    BUTTONS
 ========================================================= */
-
 .rab-btn {
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
   gap: 6px;
-
   min-height: 34px;
-
-  padding:
-    7px 12px;
-
-  background:
-    transparent;
-
-  border:
-    1px solid
-    var(--rab-gold-dim);
-
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--rab-gold-dim);
   border-radius: 4px;
-
-  color:
-    var(--rab-gold);
-
-  font-family:
-    "Manrope",
-    sans-serif;
-
+  color: var(--rab-gold);
+  font-family: "Manrope", sans-serif;
   font-size: 12px;
-
   font-weight: 600;
-
   cursor: pointer;
-
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
-
 .rab-btn:hover {
-  background:
-    var(--rab-gold);
-
-  border-color:
-    var(--rab-gold);
-
-  color:
-    #17140f;
+  background: var(--rab-gold);
+  border-color: var(--rab-gold);
+  color: #17140f;
 }
-
 .rab-btn:active {
-  transform:
-    translateY(1px);
+  transform: translateY(1px);
 }
-
 .rab-btn-small {
   min-height: 28px;
-
-  padding:
-    5px 9px;
-
+  padding: 5px 9px;
   font-size: 11px;
 }
 
 .rab-btn-primary {
-  background:
-    var(--rab-gold);
-
-  border-color:
-    var(--rab-gold);
-
-  color:
-    #17140f;
+  background: var(--rab-gold);
+  border-color: var(--rab-gold);
+  color: #17140f;
 }
-
 .rab-btn-primary:hover {
-  background:
-    var(--rab-gold-bright);
-
-  border-color:
-    var(--rab-gold-bright);
+  background: var(--rab-gold-bright);
+  border-color: var(--rab-gold-bright);
 }
 
 .rab-btn-danger {
-  color:
-    #c96b62;
-
-  border-color:
-    rgba(
-      193,
-      72,
-      60,
-      0.45
-    );
+  color: #c96b62;
+  border-color: rgba(193, 72, 60, 0.45);
+}
+.rab-btn-danger:hover {
+  background: #c1483c;
+  border-color: #c1483c;
+  color: #fff;
 }
 
-.rab-btn-danger:hover {
-  background:
-    #c1483c;
-
-  border-color:
-    #c1483c;
-
-  color:
-    #fff;
+.rab-btn-success {
+  color: var(--rab-success);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+.rab-btn-success:hover {
+  background: var(--rab-success);
+  border-color: var(--rab-success);
+  color: #17140f;
 }
 
 .rab-btn-active {
-  background:
-    rgba(
-      201,
-      162,
-      75,
-      0.16
-    );
-
-  border-color:
-    var(--rab-gold);
-
-  color:
-    var(--rab-gold-bright);
+  background: rgba(201, 162, 75, 0.16);
+  border-color: var(--rab-gold);
+  color: var(--rab-gold-bright);
 }
-
-
-/* =========================================================
-   STATE MESSAGE
-========================================================= */
 
 .rab-state-message {
   padding: 28px;
-
   margin: 0;
-
   text-align: center;
-
-  color:
-    var(--rab-muted);
+  color: var(--rab-muted);
 }
-
 .rab-state-error {
-  color:
-    #c96b62;
+  color: #c96b62;
 }
-
 
 /* =========================================================
-   EDIT MODAL
+   MODAL & FORMS
 ========================================================= */
-
 .rab-modal-overlay {
   position: fixed;
-
   inset: 0;
-
   z-index: 1200;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   padding: 20px;
-
-  background:
-    rgba(
-      0,
-      0,
-      0,
-      0.78
-    );
+  background: rgba(0, 0, 0, 0.78);
 }
-
 .rab-modal {
-  width:
-    min(
-      900px,
-      100%
-    );
-
+  width: min(900px, 100%);
   max-height: 90vh;
-
   overflow-y: auto;
-
   box-sizing: border-box;
-
   padding: 26px;
-
-  background:
-    var(--rab-surface);
-
-  border:
-    1px solid
-    var(--rab-border);
-
+  background: var(--rab-surface);
+  border: 1px solid var(--rab-border);
   border-radius: 6px;
-
-  color:
-    var(--rab-text);
-
-  box-shadow:
-    0 30px 70px
-    rgba(
-      0,
-      0,
-      0,
-      0.6
-    );
+  color: var(--rab-text);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
 }
-
 .rab-modal h3 {
-  margin:
-    0 0 8px;
-
-  color:
-    var(--rab-gold);
-
-  font-family:
-    "Fraunces",
-    Georgia,
-    serif;
-
+  margin: 0 0 8px;
+  color: var(--rab-gold);
+  font-family: "Fraunces", Georgia, serif;
   font-size: 22px;
-
   font-weight: 500;
 }
-
 .rab-edit-label {
   margin-bottom: 20px;
-
-  color:
-    var(--rab-muted);
-
+  color: var(--rab-muted);
   font-size: 12px;
 }
-
 .rab-toggle-row {
   display: flex;
-
   flex-wrap: wrap;
-
   gap: 8px;
-
   margin-bottom: 18px;
 }
-
 .rab-form-label {
   display: block;
-
   margin-bottom: 14px;
-
-  color:
-    var(--rab-muted);
-
+  color: var(--rab-muted);
   font-size: 12px;
 }
-
 .rab-form-input {
   width: 100%;
-
   box-sizing: border-box;
-
   margin-top: 6px;
-
-  padding:
-    9px 10px;
-
-  background:
-    #100f0d;
-
-  border:
-    1px solid
-    #39342b;
-
+  padding: 9px 10px;
+  background: #100f0d;
+  border: 1px solid #39342b;
   border-radius: 4px;
-
-  color:
-    var(--rab-text);
-
+  color: var(--rab-text);
   outline: none;
-
-  font-family:
-    "Manrope",
-    sans-serif;
+  font-family: "Manrope", sans-serif;
 }
-
 .rab-form-input:focus {
-  border-color:
-    var(--rab-gold);
+  border-color: var(--rab-gold);
 }
-
 .rab-form-input:disabled {
   opacity: 0.55;
-
   cursor: not-allowed;
 }
-
 .rab-form-input::placeholder {
-  color:
-    #625a4c;
+  color: #625a4c;
 }
-
 .rab-form-hint {
-  margin:
-    -4px 0 14px;
-
-  color:
-    #756d5d;
-
+  margin: -4px 0 14px;
+  color: #756d5d;
   font-size: 11px;
-
   line-height: 1.5;
 }
 
-.rab-switch-job {
-  margin-top: 18px;
-
-  padding-top: 18px;
-
-  border-top:
-    1px solid
-    var(--rab-border-soft);
+/* =========================================================
+   MODAL TABS (Untuk Switch Mode Manual/AHSP)
+========================================================= */
+.rab-tab-container {
+  display: flex;
+  background: #11100f;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--rab-border);
+  margin: 16px 0;
+  gap: 4px;
 }
-
-.rab-switch-job-box {
-  margin-top: 12px;
-
-  padding: 14px;
-
-  background:
-    #11100e;
-
-  border:
-    1px solid
-    var(--rab-border);
-
-  border-radius: 5px;
+.rab-tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--rab-muted);
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: 0.2s;
 }
-
-.rab-component-title {
-  margin-top: 20px;
-}
-
-.rab-comp-row {
-  display: grid;
-
-  grid-template-columns:
-    120px
-    minmax(150px, 1.7fr)
-    110px
-    100px
-    120px
-    auto;
-
-  gap: 8px;
-
-  margin-bottom: 8px;
-
-  align-items: center;
+.rab-tab-btn.active {
+  background: #1d1810;
+  color: var(--rab-gold-bright);
+  border: 1px solid var(--rab-border-soft);
 }
 
 .rab-modal-actions {
   display: flex;
-
   justify-content: flex-end;
-
   gap: 10px;
-
   margin-top: 22px;
-
   padding-top: 18px;
-
-  border-top:
-    1px solid
-    var(--rab-border-soft);
+  border-top: 1px solid var(--rab-border-soft);
 }
 
-
 /* =========================================================
-   RESPONSIVE - TABLET
+   RESPONSIVE
 ========================================================= */
-
 @media (max-width: 1000px) {
   .rab-wrapper {
     padding: 30px;
-    
-    /* [TAMBAHKAN RESET INI] */
     margin-left: 0;
     width: 100%;
   }
-
   .rab-header {
     grid-template-columns: auto minmax(0, 1fr) 280px;
   } 
-
   .rab-project-picker {
     width: 280px;
-
     max-width: 280px;
   }
-
   .rab-stats-grid {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
-
-/* =========================================================
-   RESPONSIVE - SMALL TABLET
-========================================================= */
 
 @media (max-width: 800px) {
   .rab-header {
-    grid-template-columns:
-      auto
-      minmax(0, 1fr);
-
-    grid-template-areas:
-      "back picker"
-      "main main";
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "back picker" "main main";
   }
-
-  .rab-back-btn {
-    grid-area: back;
-  }
-
-  .rab-header-main {
-    grid-area: main;
-  }
-
+  .rab-back-btn { grid-area: back; }
+  .rab-header-main { grid-area: main; }
   .rab-project-picker {
     grid-area: picker;
-
     width: 280px;
-
     max-width: 280px;
   }
 }
 
-
-/* =========================================================
-   RESPONSIVE - MOBILE
-========================================================= */
-
 @media (max-width: 600px) {
-  .rab-wrapper {
-    padding:
-      20px 15px;
-  }
-
-  .rab-header {
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: stretch;
-
-    gap: 15px;
-  }
-
-  .rab-back-btn {
-    align-self: flex-start;
-  }
-
-  .rab-project-picker {
-    width: 100%;
-
-    max-width: none;
-  }
-
-  .rab-title {
-    font-size: 2rem;
-
-    white-space: normal;
-  }
-
-  .rab-subtitle {
-    font-size: 13px;
-  }
-
-  .rab-stats-grid {
-    grid-template-columns:
-      1fr;
-  }
-
-  .rab-toolbar {
-    flex-direction: column;
-
-    align-items: stretch;
-  }
-
-  .rab-toolbar .rab-btn {
-    width: 100%;
-  }
-
-  .rab-group-row,
-  .rab-subgroup-row {
-    flex-direction: column;
-
-    align-items: flex-start;
-  }
-
-  .rab-group-actions {
-    width: 100%;
-
-    justify-content: space-between;
-  }
-
-  .rab-comp-row {
-    grid-template-columns:
-      1fr;
-  }
-
-  .rab-modal {
-    padding:
-      18px;
-  }
-
-  .rab-modal-actions {
-    flex-direction: column;
-  }
-
-  .rab-modal-actions .rab-btn {
-    width: 100%;
-  }
+  .rab-wrapper { padding: 20px 15px; }
+  .rab-header { display: flex; flex-direction: column; align-items: stretch; gap: 15px; }
+  .rab-back-btn { align-self: flex-start; }
+  .rab-project-picker { width: 100%; max-width: none; }
+  .rab-title { font-size: 2rem; white-space: normal; }
+  .rab-subtitle { font-size: 13px; }
+  .rab-stats-grid { grid-template-columns: 1fr; }
+  .rab-toolbar, .rab-toolbar-bulk { flex-direction: column; align-items: stretch; }
+  .rab-toolbar .rab-btn, .rab-toolbar-bulk .rab-btn { width: 100%; }
+  .rab-group-row, .rab-subgroup-row { flex-direction: column; align-items: flex-start; }
+  .rab-group-actions { width: 100%; justify-content: space-between; }
+  .rab-modal { padding: 18px; }
+  .rab-modal-actions { flex-direction: column; }
+  .rab-modal-actions .rab-btn { width: 100%; }
 }
 
-
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
-
 @media (prefers-reduced-motion: reduce) {
-  .rab-btn,
-  .rab-back-btn,
-  .rab-project-select,
-  .rab-items-table tbody tr {
-    transition: none;
-  }
+  .rab-btn, .rab-back-btn, .rab-project-select, .rab-items-table tbody tr { transition: none; }
 }

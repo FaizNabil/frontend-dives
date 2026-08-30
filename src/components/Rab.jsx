@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import "../styles/Rab.css";
 
-const API_ROOT = "http://localhost:4000/api";
-const API_URL = `${API_ROOT}/projects`;
+const API_BASE = "http://localhost:4000/api";
+const API_URL = `${API_BASE}/projects`;
 
 const fmtRp = (n) =>
   "Rp " +
@@ -30,17 +30,22 @@ const Rab = ({ initialProjectId = null, onBack }) => {
   const [fetchError, setFetchError] = useState(null);
   const [search, setSearch] = useState("");
   
+  // State untuk Tambah Group
+  const [groupModal, setGroupModal] = useState(null);
+
   // State untuk Edit Individual
   const [editModal, setEditModal] = useState(null);
 
-  // State untuk Hapus Massal
+  // State untuk Hapus Massal & Checkbox
   const [selectedItemIds, setSelectedItemIds] = useState([]);
   
-  // State untuk Update Harga Massal (Bentuknya dibuat sama persis dengan Edit Individual)
-  const [bulkModal, setBulkModal] = useState(null);
+  // State untuk 3 Modal Bulk (Sapu Jagat) yang sesuai Backend
+  const [bulkPriceModal, setBulkPriceModal] = useState(null);
+  const [bulkSwitchModal, setBulkSwitchModal] = useState(null);
+  const [bulkNameModal, setBulkNameModal] = useState(null);
 
   // ==========================================================
-  // INITIAL PROJECT
+  // INITIAL PROJECT & LOAD LIST
   // ==========================================================
   useEffect(() => {
     if (initialProjectId !== null) {
@@ -48,9 +53,6 @@ const Rab = ({ initialProjectId = null, onBack }) => {
     }
   }, [initialProjectId]);
 
-  // ==========================================================
-  // LOAD PROJECT LIST
-  // ==========================================================
   const loadProjects = async () => {
     setLoadingProjects(true);
     try {
@@ -63,7 +65,7 @@ const Rab = ({ initialProjectId = null, onBack }) => {
       const checkedProjects = await Promise.all(
         projects.map(async (projectItem) => {
           try {
-            const surveyResponse = await fetch(`${API_ROOT}/projects/${projectItem.id}/surveys`);
+            const surveyResponse = await fetch(`${API_BASE}/projects/${projectItem.id}/surveys`);
             if (!surveyResponse.ok) return null;
             const surveyResult = await surveyResponse.json();
             const surveys = Array.isArray(surveyResult) ? surveyResult : Array.isArray(surveyResult?.data) ? surveyResult.data : [];
@@ -93,7 +95,7 @@ const Rab = ({ initialProjectId = null, onBack }) => {
   }, [initialProjectId]);
 
   // ==========================================================
-  // FETCH RAB DATA (Pengganti loadTree)
+  // FETCH RAB DATA
   // ==========================================================
   const fetchRabData = async () => {
     if (!projectId) {
@@ -177,34 +179,63 @@ const Rab = ({ initialProjectId = null, onBack }) => {
   const visibleGroups = useMemo(() => filterGroups(groups, search.trim().toLowerCase()), [groups, search]);
 
   // ==========================================================
-  // DELETE ACTIONS (SINGLE & BULK)
+  // ADD GROUP & SUB-GROUP
+  // ==========================================================
+  const openGroupForm = (parentId = null) => {
+    setGroupModal({ parentId, name: "", reference: "" });
+  };
+
+  const handleSaveGroup = async () => {
+    if (!groupModal.name.trim()) return alert("Nama wajib diisi.");
+    try {
+      const res = await fetch(`${API_BASE}/projects/${projectId}/rab-groups`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: groupModal.name.trim(),
+          reference: groupModal.reference.trim() || null,
+          parentId: groupModal.parentId,
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal menyimpan group.");
+      setGroupModal(null);
+      fetchRabData();
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  // ==========================================================
+  // DELETE ACTIONS & SELECTION
   // ==========================================================
   const deleteGroup = async (id) => {
     if (!window.confirm("Hapus group ini? Semua sub-group dan baris pekerjaan di dalamnya akan ikut terhapus.")) return;
     try {
-      const response = await fetch(`${API_ROOT}/rab-groups/${id}`, { method: "DELETE" });
+      const response = await fetch(`${API_BASE}/rab-groups/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Gagal menghapus group.");
       await fetchRabData();
-    } catch (error) {
-      alert(error.message);
-    }
+    } catch (error) { alert(error.message); }
   };
 
   const deleteItem = async (id) => {
     if (!window.confirm("Hapus baris pekerjaan ini?")) return;
     try {
-      const response = await fetch(`${API_ROOT}/rab-items/${id}`, { method: "DELETE" });
+      const response = await fetch(`${API_BASE}/rab-items/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Gagal menghapus item.");
       await fetchRabData();
-    } catch (error) {
-      alert(error.message);
-    }
+    } catch (error) { alert(error.message); }
   };
 
   const toggleSelection = (id) => {
-    setSelectedItemIds((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
-    );
+    setSelectedItemIds((prev) => prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]);
+  };
+
+  const toggleAllCheckboxes = () => {
+    if (selectedItemIds.length > 0) {
+      setSelectedItemIds([]);
+    } else {
+      setSelectedItemIds(allItems.map(item => item.id));
+    }
   };
 
   const handleBulkDelete = async () => {
@@ -212,24 +243,19 @@ const Rab = ({ initialProjectId = null, onBack }) => {
     if (!window.confirm(`Yakin ingin menghapus ${selectedItemIds.length} item terpilih?`)) return;
 
     try {
-      const response = await fetch(`${API_ROOT}/rab-items/bulk-delete`, {
+      const response = await fetch(`${API_BASE}/rab-items/bulk-delete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: selectedItemIds }),
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Gagal menghapus massal.");
-      }
+      if (!response.ok) throw new Error("Gagal menghapus massal.");
       setSelectedItemIds([]); 
       await fetchRabData();
-    } catch (error) {
-      alert(error.message);
-    }
+    } catch (error) { alert(error.message); }
   };
 
   // ==========================================================
-  // EDIT ITEM INDIVIDUAL (MODAL LOGIC)
+  // EDIT ITEM INDIVIDUAL
   // ==========================================================
   const openEdit = (item) => {
     setEditModal({
@@ -267,7 +293,7 @@ const Rab = ({ initialProjectId = null, onBack }) => {
     }
     try {
       const params = new URLSearchParams({ q: query.trim() });
-      const response = await fetch(`${API_ROOT}/jobs?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/jobs?${params.toString()}`);
       if (response.ok) {
         const results = await response.json();
         setEditModal((prev) => ({
@@ -280,177 +306,113 @@ const Rab = ({ initialProjectId = null, onBack }) => {
 
   const handleSaveEdit = async () => {
     const { item, pricingMode, isByOwner, isStip, overheadPercent, rapUnitPrice, sourceJobId } = editModal;
-    const editingItemId = item.id;
-
     if (pricingMode === "manual") {
-      const finalRapUnitPrice = isByOwner || isStip ? 0 : Number(rapUnitPrice);
       try {
-        const res = await fetch(`${API_ROOT}/rab-items/${editingItemId}`, {
+        const res = await fetch(`${API_BASE}/rab-items/${item.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            rapUnitPrice: finalRapUnitPrice,
+            rapUnitPrice: isByOwner || isStip ? 0 : Number(rapUnitPrice),
             overheadPercent: Number(overheadPercent),
             isByOwner,
             isStip,
           }),
         });
         if (!res.ok) throw new Error("Gagal menyimpan data ke server.");
-        
         setEditModal(null);
         fetchRabData(); 
-      } catch (err) {
-        alert("Gagal menyimpan harga manual: " + err.message);
-      }
-    } 
-    else if (pricingMode === "ahsp") {
+      } catch (err) { alert("Gagal menyimpan harga manual: " + err.message); }
+    } else if (pricingMode === "ahsp") {
       if (!sourceJobId) return alert("Pilih Master Pekerjaan (AHSP) dari daftar!");
       try {
-        const res = await fetch(`${API_ROOT}/rab-items/${editingItemId}/switch-job`, {
+        // Backend `switch-job` hanya membaca newJobTypeId dan customOverhead
+        const payload = { newJobTypeId: sourceJobId };
+        if (overheadPercent !== "") payload.customOverhead = Number(overheadPercent);
+
+        const res = await fetch(`${API_BASE}/rab-items/${item.id}/switch-job`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            newJobTypeId: sourceJobId,
-            customOverhead: Number(overheadPercent),
-            isByOwner,
-            isStip,
-          }),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Gagal menghubungkan data AHSP.");
-        
         setEditModal(null);
         fetchRabData();
-      } catch (err) {
-        alert("Gagal menarik data Master AHSP: " + err.message);
-      }
+      } catch (err) { alert("Gagal menarik data Master AHSP: " + err.message); }
     }
   };
 
   // ==========================================================
-  // BULK UPDATE (MODAL LOGIC BARU - IDENTIK DENGAN INDIVIDUAL)
+  // BULK ACTIONS (Sapu Jagat Handlers) Sesuai Backend Endpoint
   // ==========================================================
-  const openBulkModal = () => {
-    setBulkModal({
-      name: "",
-      pricingMode: "manual",
-      rapUnitPrice: 0,
-      overheadPercent: 0,
-      isByOwner: false,
-      isStip: false,
-      sourceJobId: "",
-      switchQuery: "",
-      switchResults: [],
-    });
-  };
+  const handleSaveBulkPrice = async () => {
+    if (!bulkPriceModal.rapUnitPrice && !bulkPriceModal.overheadPercent) return alert("Isi salah satu nilai!");
+    try {
+      const payload = { ids: selectedItemIds };
+      if (bulkPriceModal.rapUnitPrice !== "") payload.rapUnitPrice = Number(bulkPriceModal.rapUnitPrice);
+      if (bulkPriceModal.overheadPercent !== "") payload.overheadPercent = Number(bulkPriceModal.overheadPercent);
 
-  const toggleBulkByOwner = () => {
-    setBulkModal((prev) => {
-      const next = !prev.isByOwner;
-      return { ...prev, isByOwner: next, rapUnitPrice: next ? 0 : prev.rapUnitPrice };
-    });
-  };
-
-  const toggleBulkStip = () => {
-    setBulkModal((prev) => {
-      const next = !prev.isStip;
-      return { ...prev, isStip: next, rapUnitPrice: next ? 0 : prev.rapUnitPrice };
-    });
+      const res = await fetch(`${API_BASE}/rab-items/bulk-price`, {
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("Gagal update harga massal.");
+      setBulkPriceModal(null);
+      setSelectedItemIds([]);
+      fetchRabData();
+    } catch (e) { alert(e.message); }
   };
 
   const searchBulkSwitchJobs = async (query) => {
-    setBulkModal((prev) => ({ ...prev, switchQuery: query }));
-    if (query.trim().length < 2) {
-      setBulkModal((prev) => ({ ...prev, switchResults: [] }));
-      return;
-    }
+    setBulkSwitchModal((prev) => ({ ...prev, switchQuery: query }));
+    if (query.trim().length < 2) return setBulkSwitchModal((prev) => ({ ...prev, switchResults: [] }));
     try {
-      const params = new URLSearchParams({ q: query.trim() });
-      const response = await fetch(`${API_ROOT}/jobs?${params.toString()}`);
-      if (response.ok) {
-        const results = await response.json();
-        setBulkModal((prev) => ({
-          ...prev,
-          switchResults: Array.isArray(results) ? results : [],
-        }));
+      const res = await fetch(`${API_BASE}/jobs?q=${encodeURIComponent(query.trim())}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBulkSwitchModal((prev) => ({ ...prev, switchResults: Array.isArray(data) ? data : [] }));
       }
     } catch {}
   };
 
-  const handleBulkUpdateSubmit = async () => {
-    if (!projectId) return alert("Pilih project terlebih dahulu.");
-    if (!bulkModal.name.trim()) return alert("Nama item wajib diisi.");
-
-    const { pricingMode, isByOwner, isStip, overheadPercent, rapUnitPrice, sourceJobId } = bulkModal;
-
-    // 1. Filter Item yang namanya sama persis
-    const matchedItems = allItems.filter(
-      (item) => item.name.trim().toLowerCase() === bulkModal.name.trim().toLowerCase()
-    );
-
-    if (matchedItems.length === 0) {
-      return alert(`Tidak ditemukan item dengan nama "${bulkModal.name}" di project ini.`);
-    }
-
-    if (!window.confirm(`Ditemukan ${matchedItems.length} item "${bulkModal.name}". Terapkan perubahan ke semuanya?`)) return;
-
+  const handleSaveBulkSwitch = async () => {
+    if (!bulkSwitchModal.sourceJobId) return alert("ID Master Pekerjaan wajib dipilih!");
     try {
-      // 2. Loop update menggunakan endpoint individual agar Support AHSP & Manual secara utuh
-      if (pricingMode === "manual") {
-        const finalRapUnitPrice = isByOwner || isStip ? 0 : Number(rapUnitPrice);
-        const payload = {
-          rapUnitPrice: finalRapUnitPrice,
-          overheadPercent: Number(overheadPercent),
-          isByOwner,
-          isStip,
-        };
+      const payload = { 
+        ids: selectedItemIds, 
+        newJobTypeId: bulkSwitchModal.sourceJobId 
+      };
+      if (bulkSwitchModal.overheadPercent !== "") payload.customOverhead = Number(bulkSwitchModal.overheadPercent);
 
-        await Promise.all(
-          matchedItems.map(async (item) => {
-            const res = await fetch(`${API_ROOT}/rab-items/${item.id}`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            });
-            if (!res.ok) throw new Error(`Gagal update manual: ${item.name}`);
-          })
-        );
-      } 
-      else if (pricingMode === "ahsp") {
-        if (!sourceJobId) return alert("Pilih Master Pekerjaan (AHSP) dari daftar pencarian terlebih dahulu!");
+      const res = await fetch(`${API_BASE}/rab-items/bulk-switch-job`, {
+        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("Gagal suntik AHSP massal.");
+      setBulkSwitchModal(null);
+      setSelectedItemIds([]);
+      fetchRabData();
+    } catch (e) { alert(e.message); }
+  };
 
-        await Promise.all(
-          matchedItems.map(async (item) => {
-            const res = await fetch(`${API_ROOT}/rab-items/${item.id}/switch-job`, {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                newJobTypeId: sourceJobId,
-                customOverhead: Number(overheadPercent),
-                isByOwner,
-                isStip,
-              }),
-            });
-            if (!res.ok) throw new Error(`Gagal tarik AHSP massal: ${item.name}`);
-          })
-        );
-      }
-
-      alert(`Berhasil memperbarui ${matchedItems.length} item secara massal!`);
-      setBulkModal(null);
-      fetchRabData(); 
-    } catch (error) {
-      alert("Kesalahan saat update massal: " + error.message);
-    }
+  const handleSaveBulkName = async () => {
+    if (!bulkNameModal.name || !bulkNameModal.rapUnitPrice) return alert("Nama item dan harga baru wajib diisi!");
+    try {
+      const res = await fetch(`${API_BASE}/projects/${projectId}/rab-items/bulk-price-by-name`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: bulkNameModal.name, newUnitPrice: Number(bulkNameModal.rapUnitPrice) })
+      });
+      if (!res.ok) throw new Error("Gagal Sapu Jagat.");
+      setBulkNameModal(null);
+      fetchRabData();
+    } catch (e) { alert(e.message); }
   };
 
   // ==========================================================
   // EXPORT & VIEW
   // ==========================================================
-  const exportRabExcel = () => projectId && (window.location.href = `${API_ROOT}/projects/${projectId}/rab-items/export`);
-  const exportBvExcel = () => projectId && (window.location.href = `${API_ROOT}/projects/${projectId}/bv-items/export`);
-  const exportFullExcel = () => projectId && (window.location.href = `${API_ROOT}/projects/${projectId}/export-full`);
-  const scheduleExport = () => projectId && (window.location.href = `${API_ROOT}/projects/${projectId}/time-schedule/export`);
-  const viewRab = () => projectId && window.open(`${API_ROOT}/projects/${projectId}/rab-items/view`, "_blank");
+  const exportRabExcel = () => projectId && (window.location.href = `${API_BASE}/projects/${projectId}/rab-items/export`);
+  const exportBvExcel = () => projectId && (window.location.href = `${API_BASE}/projects/${projectId}/bv-items/export`);
+  const exportFullExcel = () => projectId && (window.location.href = `${API_BASE}/projects/${projectId}/export-full`);
+  const scheduleExport = () => projectId && (window.location.href = `${API_BASE}/projects/${projectId}/time-schedule/export`);
+  const viewRab = () => projectId && window.open(`${API_BASE}/projects/${projectId}/rab-items/view`, "_blank");
 
   // ==========================================================
   // RENDER
@@ -466,7 +428,7 @@ const Rab = ({ initialProjectId = null, onBack }) => {
         <div className="rab-header-main">
           <p className="rab-eyebrow">{project?.name ? `Project: ${project.name}` : "Financial Control"}</p>
           <h2 className="rab-title">RAB &amp; Budgeting</h2>
-          <p className="rab-subtitle">Rencana Anggaran Biaya (RAB) vs Rencana Anggaran Pelaksanaan (RAP) — hasil link dari BV</p>
+          <p className="rab-subtitle">Rencana Anggaran Biaya (RAB) vs Rencana Anggaran Pelaksanaan (RAP)</p>
         </div>
         <div className="rab-project-picker">
           <select
@@ -492,24 +454,43 @@ const Rab = ({ initialProjectId = null, onBack }) => {
         ) : (
           <>
             <div className="rab-toolbar">
+              {/* TOMBOL MANAJEMEN GROUP */}
+              <button className="rab-btn rab-btn-primary" onClick={() => openGroupForm(null)}>+ Tambah Group Pekerjaan</button>
+              
+              {/* TOMBOL EXPORT DLL */}
               <button className="rab-btn" onClick={exportRabExcel}>⬇ Export RAB</button>
               <button className="rab-btn" onClick={exportBvExcel}>⬇ Export BV</button>
               <button className="rab-btn" onClick={scheduleExport}>⬇ Export Schedule</button>
               <button className="rab-btn" onClick={exportFullExcel}>⬇ Export Lengkap</button>
               <button className="rab-btn" onClick={viewRab}>👁 View RAB</button>
-              
-              {/* TOMBOL UPDATE HARGA MASSAL */}
-              <button className="rab-btn" onClick={openBulkModal}>🪄 Update Harga Global</button>
-              
-              {/* TOMBOL DELETE TERPILIH */}
-              {selectedItemIds.length > 0 && (
-                <button className="rab-btn rab-btn-danger" onClick={handleBulkDelete}>
-                  🗑 Hapus Terpilih ({selectedItemIds.length})
-                </button>
-              )}
 
               <button className="rab-btn rab-refresh-btn" onClick={loadProjects} type="button">
                 <RefreshCw size={15} /> Refresh
+              </button>
+            </div>
+
+            {/* TOOLBAR BULK ACTIONS (Sapu Jagat) */}
+            <div className="rab-toolbar-bulk">
+              <strong>Bulk Actions:</strong>
+              
+              <button className="rab-btn rab-btn-small" onClick={toggleAllCheckboxes}>
+                ☑ Pilih/Batal Semua
+              </button>
+              
+              <button className="rab-btn rab-btn-small rab-btn-danger" onClick={handleBulkDelete}>
+                Hapus Terpilih
+              </button>
+              
+              <button className="rab-btn rab-btn-small" onClick={() => selectedItemIds.length ? setBulkPriceModal({ rapUnitPrice: "", overheadPercent: "" }) : alert("Pilih baris yang akan diedit harganya terlebih dahulu!")}>
+                Edit Harga Terpilih
+              </button>
+              
+              <button className="rab-btn rab-btn-small rab-btn-success" onClick={() => selectedItemIds.length ? setBulkSwitchModal({ sourceJobId: "", switchQuery: "", switchResults: [], overheadPercent: "" }) : alert("Pilih baris yang akan disuntik AHSP terlebih dahulu!")}>
+                Suntik AHSP Terpilih
+              </button>
+              
+              <button className="rab-btn rab-btn-small rab-btn-primary" onClick={() => projectId ? setBulkNameModal({ name: "", rapUnitPrice: "" }) : alert("Pilih project terlebih dahulu!")}>
+                Sapu Jagat (By Nama)
               </button>
             </div>
 
@@ -549,13 +530,14 @@ const Rab = ({ initialProjectId = null, onBack }) => {
               ) : fetchError ? (
                 <p className="rab-state-message rab-state-error">{fetchError}</p>
               ) : visibleGroups.length === 0 ? (
-                <p className="rab-state-message">Belum ada Group Pekerjaan. Bikin dari halaman "Buat BV" dulu.</p>
+                <p className="rab-state-message">Belum ada Group Pekerjaan. Buat dari tombol di atas.</p>
               ) : (
                 visibleGroups.map((group) => (
                   <RabGroupNode
                     key={group.id} group={group} depth={0}
                     sumGroupRecursive={sumGroupRecursive}
                     onDeleteGroup={deleteGroup}
+                    onAddSubGroup={openGroupForm}
                     onEditItem={openEdit}
                     onDeleteItem={deleteItem}
                     selectedItemIds={selectedItemIds}
@@ -568,131 +550,22 @@ const Rab = ({ initialProjectId = null, onBack }) => {
         )}
       </main>
 
-      {/* ================= MODAL UPDATE HARGA MASSAL (Sapu Jagat) ================= */}
-      {bulkModal && (
+      {/* ================= MODAL TAMBAH GROUP ================= */}
+      {groupModal && (
         <div className="rab-modal-overlay">
           <div className="rab-modal">
-            <h3>Update Harga Massal (Sapu Jagat)</h3>
-            <p className="rab-form-hint" style={{ marginBottom: "16px" }}>
-              Update massal item RAB berdasarkan <b>Nama Uraian Pekerjaan</b> yang sama.
-            </p>
-
-            <label className="rab-form-label">
-              Nama Uraian Pekerjaan (Target)
-              <input
-                type="text"
-                className="rab-form-input"
-                placeholder="Ketik nama item yang mau diupdate..."
-                value={bulkModal.name}
-                onChange={(e) => setBulkModal({ ...bulkModal, name: e.target.value })}
-              />
-            </label>
-
-            <div className="rab-toggle-row" style={{ marginTop: '16px' }}>
-              <button
-                type="button"
-                className={`rab-btn rab-btn-small ${bulkModal.isByOwner ? "rab-btn-active" : ""}`}
-                onClick={toggleBulkByOwner}
-              >
-                {bulkModal.isByOwner ? "✓ By Owner" : "Set By Owner"}
-              </button>
-              <button
-                type="button"
-                className={`rab-btn rab-btn-small ${bulkModal.isStip ? "rab-btn-active" : ""}`}
-                onClick={toggleBulkStip}
-              >
-                {bulkModal.isStip ? "Batal Set Stip" : "Set Harga Stip (-)"}
-              </button>
-            </div>
-
+            <h3>{groupModal.parentId ? "Tambah Sub-Group Pekerjaan" : "Tambah Group Pekerjaan"}</h3>
             <label className="rab-form-label" style={{ marginTop: '16px' }}>
-              Persentase Overhead / Profit (%)
-              <input
-                type="number"
-                step="0.01"
-                className="rab-form-input"
-                value={bulkModal.isByOwner || bulkModal.isStip ? "" : bulkModal.overheadPercent}
-                disabled={bulkModal.isByOwner || bulkModal.isStip}
-                onChange={(e) => setBulkModal({ ...bulkModal, overheadPercent: e.target.value })}
-              />
+              Nama
+              <input type="text" className="rab-form-input" placeholder="mis. PEKERJAAN PERSIAPAN" value={groupModal.name} onChange={(e) => setGroupModal({ ...groupModal, name: e.target.value })} />
             </label>
-
-            {/* TAB SYSTEM: MANUAL VS AHSP */}
-            <div className="rab-toggle-row" style={{ marginBottom: '16px', marginTop: '16px', background: '#222', padding: '4px', borderRadius: '6px' }}>
-              <button
-                type="button"
-                style={{ flex: 1, border: 'none', background: bulkModal.pricingMode === "manual" ? '#444' : 'transparent', color: '#fff', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}
-                onClick={() => setBulkModal({ ...bulkModal, pricingMode: "manual" })}
-              >
-                📝 Input Manual
-              </button>
-              <button
-                type="button"
-                style={{ flex: 1, border: 'none', background: bulkModal.pricingMode === "ahsp" ? '#444' : 'transparent', color: '#fff', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}
-                onClick={() => setBulkModal({ ...bulkModal, pricingMode: "ahsp" })}
-              >
-                🔄 Tarik Master AHSP
-              </button>
-            </div>
-
-            {/* KONTEN TAB MANUAL */}
-            {bulkModal.pricingMode === "manual" && (
-              <div style={{ padding: '12px', background: '#1a1a1a', borderRadius: '6px', border: '1px solid #333' }}>
-                <label className="rab-form-label">
-                  Harga Modal / RAP (Satuan)
-                  <input
-                    type="number"
-                    className="rab-form-input"
-                    value={bulkModal.isByOwner || bulkModal.isStip ? "" : bulkModal.rapUnitPrice}
-                    disabled={bulkModal.isByOwner || bulkModal.isStip}
-                    onChange={(e) => setBulkModal({ ...bulkModal, rapUnitPrice: e.target.value })}
-                  />
-                </label>
-              </div>
-            )}
-
-            {/* KONTEN TAB AHSP */}
-            {bulkModal.pricingMode === "ahsp" && (
-              <div style={{ padding: '12px', background: '#1a1a1a', borderRadius: '6px', border: '1px solid #333' }}>
-                <label className="rab-form-label">
-                  Cari Jenis Pekerjaan Master
-                  <input
-                    className="rab-form-input"
-                    placeholder="Ketik nama pekerjaan dari AHSP..."
-                    value={bulkModal.switchQuery}
-                    onChange={(e) => searchBulkSwitchJobs(e.target.value)}
-                  />
-                </label>
-
-                {bulkModal.switchResults.length > 0 && (
-                  <label className="rab-form-label" style={{ marginTop: '12px' }}>
-                    Pilih Hasil Pencarian:
-                    <select
-                      className="rab-form-input"
-                      size={4}
-                      value={bulkModal.sourceJobId || ""}
-                      onChange={(e) => setBulkModal({ ...bulkModal, sourceJobId: e.target.value })}
-                    >
-                      <option value="" disabled>-- Klik salah satu Master AHSP di bawah ini --</option>
-                      {bulkModal.switchResults.map((job) => (
-                        <option key={job.id} value={job.id}>
-                          {job.reference ? `${job.reference} — ` : ""}
-                          {job.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-              </div>
-            )}
-
+            <label className="rab-form-label" style={{ marginTop: '16px' }}>
+              Referensi (opsional)
+              <input type="text" className="rab-form-input" placeholder="mis. 1 atau 1.1" value={groupModal.reference} onChange={(e) => setGroupModal({ ...groupModal, reference: e.target.value })} />
+            </label>
             <div className="rab-modal-actions" style={{ marginTop: '24px' }}>
-              <button className="rab-btn" onClick={() => setBulkModal(null)} type="button">
-                Batal
-              </button>
-              <button className="rab-btn rab-btn-primary" onClick={handleBulkUpdateSubmit} type="button">
-                Terapkan Massal
-              </button>
+              <button className="rab-btn" onClick={() => setGroupModal(null)} type="button">Batal</button>
+              <button className="rab-btn rab-btn-primary" onClick={handleSaveGroup} type="button">Simpan Group</button>
             </div>
           </div>
         </div>
@@ -703,105 +576,55 @@ const Rab = ({ initialProjectId = null, onBack }) => {
         <div className="rab-modal-overlay">
           <div className="rab-modal">
             <h3>Edit Baris Pekerjaan</h3>
-            <p className="rab-edit-label">
-              {editModal.item.name} — {editModal.item.paymentUnit} — Vol: {Number(editModal.item.volume).toFixed(2)}
-            </p>
+            <p className="rab-edit-label">{editModal.item.name} — {editModal.item.paymentUnit} — Vol: {Number(editModal.item.volume).toFixed(2)}</p>
 
             <div className="rab-toggle-row">
-              <button
-                type="button"
-                className={`rab-btn rab-btn-small ${editModal.isByOwner ? "rab-btn-active" : ""}`}
-                onClick={toggleByOwner}
-              >
+              <button type="button" className={`rab-btn rab-btn-small ${editModal.isByOwner ? "rab-btn-active" : ""}`} onClick={toggleByOwner}>
                 {editModal.isByOwner ? "✓ By Owner" : "Set By Owner"}
               </button>
-              <button
-                type="button"
-                className={`rab-btn rab-btn-small ${editModal.isStip ? "rab-btn-active" : ""}`}
-                onClick={toggleStip}
-              >
+              <button type="button" className={`rab-btn rab-btn-small ${editModal.isStip ? "rab-btn-active" : ""}`} onClick={toggleStip}>
                 {editModal.isStip ? "Batal Set Stip" : "Set Harga Stip (-)"}
               </button>
             </div>
 
             <label className="rab-form-label" style={{ marginTop: '16px' }}>
               Persentase Overhead / Profit (%)
-              <input
-                type="number"
-                step="0.01"
-                className="rab-form-input"
-                value={editModal.isByOwner || editModal.isStip ? "" : editModal.overheadPercent}
-                disabled={editModal.isByOwner || editModal.isStip}
-                onChange={(e) => setEditModal({ ...editModal, overheadPercent: e.target.value })}
-              />
+              <input type="number" step="0.01" className="rab-form-input" value={editModal.isByOwner || editModal.isStip ? "" : editModal.overheadPercent} disabled={editModal.isByOwner || editModal.isStip} onChange={(e) => setEditModal({ ...editModal, overheadPercent: e.target.value })} />
             </label>
 
-            <p className="rab-form-hint" style={{ marginBottom: '24px' }}>
-              Profit ini akan digunakan di Mode Manual maupun Tarik AHSP.
-            </p>
+            <p className="rab-form-hint" style={{ marginBottom: '24px' }}>Profit ini akan digunakan di Mode Manual maupun Tarik AHSP.</p>
 
-            {/* TAB SYSTEM: MANUAL VS AHSP */}
-            <div className="rab-toggle-row" style={{ marginBottom: '16px', background: '#222', padding: '4px', borderRadius: '6px' }}>
-              <button
-                type="button"
-                style={{ flex: 1, border: 'none', background: editModal.pricingMode === "manual" ? '#444' : 'transparent', color: '#fff', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}
-                onClick={() => setEditModal({ ...editModal, pricingMode: "manual" })}
-              >
+            <div className="rab-tab-container">
+              <button type="button" className={`rab-tab-btn ${editModal.pricingMode === "manual" ? "active" : ""}`} onClick={() => setEditModal({ ...editModal, pricingMode: "manual" })}>
                 📝 Input Manual
               </button>
-              <button
-                type="button"
-                style={{ flex: 1, border: 'none', background: editModal.pricingMode === "ahsp" ? '#444' : 'transparent', color: '#fff', padding: '8px', borderRadius: '4px', cursor: 'pointer' }}
-                onClick={() => setEditModal({ ...editModal, pricingMode: "ahsp" })}
-              >
+              <button type="button" className={`rab-tab-btn ${editModal.pricingMode === "ahsp" ? "active" : ""}`} onClick={() => setEditModal({ ...editModal, pricingMode: "ahsp" })}>
                 🔄 Tarik Master AHSP
               </button>
             </div>
 
-            {/* KONTEN TAB MANUAL */}
             {editModal.pricingMode === "manual" && (
               <div style={{ padding: '12px', background: '#1a1a1a', borderRadius: '6px', border: '1px solid #333' }}>
                 <label className="rab-form-label">
                   Harga Modal / RAP (Satuan)
-                  <input
-                    type="number"
-                    className="rab-form-input"
-                    value={editModal.isByOwner || editModal.isStip ? "" : editModal.rapUnitPrice}
-                    disabled={editModal.isByOwner || editModal.isStip}
-                    onChange={(e) => setEditModal({ ...editModal, rapUnitPrice: e.target.value })}
-                  />
+                  <input type="number" className="rab-form-input" value={editModal.isByOwner || editModal.isStip ? "" : editModal.rapUnitPrice} disabled={editModal.isByOwner || editModal.isStip} onChange={(e) => setEditModal({ ...editModal, rapUnitPrice: e.target.value })} />
                 </label>
               </div>
             )}
 
-            {/* KONTEN TAB AHSP */}
             {editModal.pricingMode === "ahsp" && (
               <div style={{ padding: '12px', background: '#1a1a1a', borderRadius: '6px', border: '1px solid #333' }}>
                 <label className="rab-form-label">
                   Cari Jenis Pekerjaan Master
-                  <input
-                    className="rab-form-input"
-                    placeholder="Ketik nama pekerjaan dari AHSP..."
-                    value={editModal.switchQuery}
-                    onChange={(e) => searchSwitchJobs(e.target.value)}
-                  />
+                  <input className="rab-form-input" placeholder="Ketik nama pekerjaan dari AHSP..." value={editModal.switchQuery} onChange={(e) => searchSwitchJobs(e.target.value)} />
                 </label>
-
                 {editModal.switchResults.length > 0 && (
                   <label className="rab-form-label" style={{ marginTop: '12px' }}>
                     Pilih Hasil Pencarian:
-                    <select
-                      className="rab-form-input"
-                      size={4}
-                      value={editModal.sourceJobId || ""}
-                      onChange={(e) => setEditModal({ ...editModal, sourceJobId: e.target.value })}
-                    >
+                    <select className="rab-form-input" size={4} value={editModal.sourceJobId || ""} onChange={(e) => setEditModal({ ...editModal, sourceJobId: e.target.value })}>
                       <option value="" disabled>-- Klik salah satu Master AHSP di bawah ini --</option>
                       {editModal.switchResults.map((job) => (
-                        <option key={job.id} value={job.id}>
-                          {job.reference ? `${job.reference} — ` : ""}
-                          {job.name}
-                        </option>
+                        <option key={job.id} value={job.id}>{job.reference ? `${job.reference} — ` : ""}{job.name}</option>
                       ))}
                     </select>
                   </label>
@@ -810,16 +633,80 @@ const Rab = ({ initialProjectId = null, onBack }) => {
             )}
 
             <div className="rab-modal-actions" style={{ marginTop: '24px' }}>
-              <button className="rab-btn" onClick={() => setEditModal(null)} type="button">
-                Batal
-              </button>
-              <button className="rab-btn rab-btn-primary" onClick={handleSaveEdit} type="button">
-                Simpan Perubahan
-              </button>
+              <button className="rab-btn" onClick={() => setEditModal(null)} type="button">Batal</button>
+              <button className="rab-btn rab-btn-primary" onClick={handleSaveEdit} type="button">Simpan Perubahan</button>
             </div>
           </div>
         </div>
       )}
+
+      {/* ================= MODAL BULK PRICE ================= */}
+      {bulkPriceModal && (
+        <div className="rab-modal-overlay">
+          <div className="rab-modal">
+            <h3>Edit Harga Massal (Terpilih)</h3>
+            <label className="rab-form-label" style={{ marginTop: '16px' }}>Harga Baru (RAP Satuan)
+              <input type="number" className="rab-form-input" placeholder="Kosongkan jika tidak ingin ubah" value={bulkPriceModal.rapUnitPrice} onChange={(e) => setBulkPriceModal({ ...bulkPriceModal, rapUnitPrice: e.target.value })} />
+            </label>
+            <label className="rab-form-label" style={{ marginTop: '16px' }}>Overhead Baru (%)
+              <input type="number" className="rab-form-input" placeholder="Kosongkan jika tidak ingin ubah" value={bulkPriceModal.overheadPercent} onChange={(e) => setBulkPriceModal({ ...bulkPriceModal, overheadPercent: e.target.value })} />
+            </label>
+            <div className="rab-modal-actions" style={{ marginTop: '24px' }}>
+              <button className="rab-btn" onClick={() => setBulkPriceModal(null)}>Batal</button>
+              <button className="rab-btn rab-btn-primary" onClick={handleSaveBulkPrice}>Update Massal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL BULK SWITCH AHSP ================= */}
+      {bulkSwitchModal && (
+        <div className="rab-modal-overlay">
+          <div className="rab-modal">
+            <h3>Suntik AHSP Massal (Terpilih)</h3>
+            <div style={{ padding: '12px', background: '#1a1a1a', borderRadius: '6px', border: '1px solid #333', marginTop: '16px' }}>
+              <label className="rab-form-label">Cari Master Pekerjaan
+                <input className="rab-form-input" placeholder="Ketik nama pekerjaan..." value={bulkSwitchModal.switchQuery} onChange={(e) => searchBulkSwitchJobs(e.target.value)} />
+              </label>
+              {bulkSwitchModal.switchResults.length > 0 && (
+                <select className="rab-form-input" size={4} style={{ marginTop: '12px' }} value={bulkSwitchModal.sourceJobId || ""} onChange={(e) => setBulkSwitchModal({ ...bulkSwitchModal, sourceJobId: e.target.value })}>
+                  <option value="" disabled>-- Pilih Master AHSP --</option>
+                  {bulkSwitchModal.switchResults.map((job) => (
+                    <option key={job.id} value={job.id}>{job.reference ? `${job.reference} — ` : ""}{job.name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <label className="rab-form-label" style={{ marginTop: '16px' }}>Custom Overhead (%)
+              <input type="number" className="rab-form-input" placeholder="Kosongkan untuk pakai default" value={bulkSwitchModal.overheadPercent} onChange={(e) => setBulkSwitchModal({ ...bulkSwitchModal, overheadPercent: e.target.value })} />
+            </label>
+            <div className="rab-modal-actions" style={{ marginTop: '24px' }}>
+              <button className="rab-btn" onClick={() => setBulkSwitchModal(null)}>Batal</button>
+              <button className="rab-btn rab-btn-success" onClick={handleSaveBulkSwitch}>Suntik Massal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL SAPU JAGAT BY NAMA ================= */}
+      {bulkNameModal && (
+        <div className="rab-modal-overlay">
+          <div className="rab-modal">
+            <h3>Sapu Jagat: Update By Nama</h3>
+            <label className="rab-form-label" style={{ marginTop: '16px' }}>Nama Item (Harus Sama Persis)
+              <input type="text" className="rab-form-input" placeholder="Misal: Cat Dinding Dalam" value={bulkNameModal.name} onChange={(e) => setBulkNameModal({ ...bulkNameModal, name: e.target.value })} />
+            </label>
+            <label className="rab-form-label" style={{ marginTop: '16px' }}>Harga Baru (RAP Satuan)
+              <input type="number" className="rab-form-input" value={bulkNameModal.rapUnitPrice} onChange={(e) => setBulkNameModal({ ...bulkNameModal, rapUnitPrice: e.target.value })} />
+            </label>
+            <div className="rab-modal-actions" style={{ marginTop: '24px' }}>
+              <button className="rab-btn" onClick={() => setBulkNameModal(null)}>Batal</button>
+              <button className="rab-btn rab-btn-danger" onClick={handleSaveBulkName}>Eksekusi Sapu Jagat</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
@@ -827,7 +714,17 @@ const Rab = ({ initialProjectId = null, onBack }) => {
 // ==========================================================
 // GROUP NODE & ITEMS TABLE
 // ==========================================================
-function RabGroupNode({ group, depth, sumGroupRecursive, onDeleteGroup, onEditItem, onDeleteItem, selectedItemIds, onToggleSelect }) {
+function RabGroupNode({ 
+  group, 
+  depth, 
+  sumGroupRecursive, 
+  onDeleteGroup, 
+  onAddSubGroup, 
+  onEditItem, 
+  onDeleteItem, 
+  selectedItemIds, 
+  onToggleSelect 
+}) {
   const subtotal = sumGroupRecursive(group);
   return (
     <div className="rab-group-block" style={{ marginLeft: depth > 0 ? 18 : 0 }}>
@@ -838,6 +735,9 @@ function RabGroupNode({ group, depth, sumGroupRecursive, onDeleteGroup, onEditIt
         </div>
         <div className="rab-group-actions">
           <span className="rab-group-subtotal">{fmtRp(subtotal)}</span>
+          {depth === 0 && (
+            <button className="rab-btn rab-btn-small" onClick={() => onAddSubGroup(group.id)} type="button">+ Sub-Group</button>
+          )}
           <button className="rab-btn rab-btn-small rab-btn-danger" onClick={() => onDeleteGroup(group.id)} type="button">Hapus</button>
         </div>
       </div>
@@ -855,6 +755,7 @@ function RabGroupNode({ group, depth, sumGroupRecursive, onDeleteGroup, onEditIt
           key={child.id} group={child} depth={depth + 1}
           sumGroupRecursive={sumGroupRecursive}
           onDeleteGroup={onDeleteGroup}
+          onAddSubGroup={onAddSubGroup}
           onEditItem={onEditItem} onDeleteItem={onDeleteItem}
           selectedItemIds={selectedItemIds}
           onToggleSelect={onToggleSelect}
@@ -883,7 +784,6 @@ function RabItemsTable({ items, onEdit, onDelete, selectedItemIds, onToggleSelec
           <th></th>
         </tr>
       </thead>
-
       <tbody>
         {items.map((item) => {
           const isChild = !!item.parentId;
@@ -894,21 +794,16 @@ function RabItemsTable({ items, onEdit, onDelete, selectedItemIds, onToggleSelec
             <tr key={item.id} className={selectedItemIds.includes(item.id) ? "rab-row-selected" : ""}>
               <td style={{ textAlign: "center" }}>
                 <input 
-                  type="checkbox" 
-                  style={{ cursor: "pointer" }}
-                  checked={selectedItemIds.includes(item.id)} 
-                  onChange={() => onToggleSelect(item.id)} 
-                />
+                    type="checkbox" 
+                    className="rab-checkbox"
+                    checked={selectedItemIds.includes(item.id)} 
+                    onChange={() => onToggleSelect(item.id)} 
+                  />
               </td>
               <td>{item.reference || no || ""}</td>
-              <td>
-                {isChild ? "— " : ""}
-                {item.name}
-              </td>
+              <td>{isChild ? "— " : ""}{item.name}</td>
               <td>{item.paymentUnit}</td>
-              <td className="rab-mono">
-                {item.volume != null ? Number(item.volume).toFixed(2) : ""}
-              </td>
+              <td className="rab-mono">{item.volume != null ? Number(item.volume).toFixed(2) : ""}</td>
               {special ? (
                 <>
                   <td className="rab-text-center rab-special-cell">{special}</td>

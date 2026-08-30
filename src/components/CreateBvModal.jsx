@@ -1137,28 +1137,49 @@ function BvTable({ groupNo, items, onEdit, onDelete, onLink, onSync, onUnlink, s
         style={{ tableLayout: "fixed", width: "100%", minWidth: 1400 }}
       >
         <colgroup>
-          <col style={{ width: 32 }} />   {/* checkbox */}
-          <col style={{ width: 44 }} />   {/* NO */}
-          <col style={{ width: 180 }} />  {/* URAIAN PEKERJAAN */}
-          <col style={{ width: 52 }} />   {/* SAT (vol) */}
-          <col style={{ width: 64 }} />   {/* VOL (vol) */}
-          <col style={{ width: 130 }} />  {/* KETERANGAN */}
-          <col style={{ width: 62 }} />   {/* Panjang */}
-          <col style={{ width: 58 }} />   {/* Lebar */}
-          <col style={{ width: 58 }} />   {/* Tinggi */}
-          <col style={{ width: 58 }} />   {/* Luas */}
-          <col style={{ width: 62 }} />   {/* Keliling */}
-          <col style={{ width: 48 }} />   {/* Dia */}
-          <col style={{ width: 58 }} />   {/* Berat */}
-          <col style={{ width: 42 }} />   {/* Sisi */}
-          <col style={{ width: 42 }} />   {/* Bh */}
-          <col style={{ width: 54 }} />   {/* Waste */}
-          <col style={{ width: 64 }} />   {/* VOL (total) */}
-          <col style={{ width: 52 }} />   {/* SAT (total) */}
-          <col style={{ width: 100 }} />  {/* LINK E-COMMERCE */}
-          <col style={{ width: 82 }} />   {/* Status */}
-          <col style={{ width: 136 }} />  {/* Actions */}
-        </colgroup>
+            {/* checkbox */}
+            <col style={{ width: 32 }} />
+            {/* NO */}
+            <col style={{ width: 44 }} />
+            {/* URAIAN PEKERJAAN */}
+            <col style={{ width: 180 }} />
+            {/* SAT (vol) */}
+            <col style={{ width: 52 }} />
+            {/* VOL (vol) */}
+            <col style={{ width: 64 }} />
+            {/* KETERANGAN */}
+            <col style={{ width: 130 }} />
+            {/* Panjang */}
+            <col style={{ width: 62 }} />
+            {/* Lebar */}
+            <col style={{ width: 58 }} />
+            {/* Tinggi */}
+            <col style={{ width: 58 }} />
+            {/* Luas */}
+            <col style={{ width: 58 }} />
+            {/* Keliling */}
+            <col style={{ width: 62 }} />
+            {/* Dia */}
+            <col style={{ width: 48 }} />
+            {/* Berat */}
+            <col style={{ width: 58 }} />
+            {/* Sisi */}
+            <col style={{ width: 42 }} />
+            {/* Bh */}
+            <col style={{ width: 42 }} />
+            {/* Waste */}
+            <col style={{ width: 54 }} />
+            {/* VOL (total) */}
+            <col style={{ width: 64 }} />
+            {/* SAT (total) */}
+            <col style={{ width: 52 }} />
+            {/* LINK E-COMMERCE */}
+            <col style={{ width: 100 }} />
+            {/* Status */}
+            <col style={{ width: 82 }} />
+            {/* Actions */}
+            <col style={{ width: 136 }} />
+          </colgroup>
 
         <thead>
           <tr>
